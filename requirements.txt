@@ -2,3 +2,6 @@ fastapi
 uvicorn[standard]
 sqlalchemy
 loguru>=0.7.0
+uvicorn
+sqlalchemy
+pytest
