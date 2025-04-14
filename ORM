@@ -3,7 +3,6 @@ from sqlalchemy.orm import relationship, declarative_base, sessionmaker
 
 Base = declarative_base()
 
-
 class Utilisateur(Base):
     __tablename__ = "Utilisateur"
     
