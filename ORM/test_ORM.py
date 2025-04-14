@@ -1,7 +1,7 @@
 import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from ORM import Base, Utilisateur 
+from ORM import Utilisateur 
 
 # Fixture for setting up and tearing down the database
 @pytest.fixture
