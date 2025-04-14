@@ -2,8 +2,6 @@ name: CI/CD Pipeline for Python
 
 on:
   push:
-    branches:
-      - main  # Déclenche le pipeline sur un push vers la branche main
   pull_request:
     branches:
       - main  # Déclenche le pipeline sur une pull request vers la branche main
