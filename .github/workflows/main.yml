@@ -24,6 +24,10 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
+      - name: Run tests
+        run: |
+          python -m pytest  # Exécute les tests avec pytest
+          
       - name: Run linting
         run: |
           pip install flake8  # Installe flake8 pour le linting
