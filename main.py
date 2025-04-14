@@ -3,6 +3,7 @@ app = FastAPI()
 
 
 
+
 @app.get("/")
 async def root():
     return {"sentence": "Hello word"}
