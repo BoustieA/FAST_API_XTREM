@@ -1,7 +1,7 @@
 import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from user import Utilisateur
+from user import Utilisateur, Base
 
 
 # Fixture for setting up and tearing down the database
@@ -15,11 +15,13 @@ def session():
     session.close()
 
 def test_create_utilisateur(session):
-    utilisateur = Utilisateur(nom="Alice", email="alice@example.com", pswd="secure123")
+    utilisateur = Utilisateur(nom="Alice",
+                              email="alice@example.com", pswd="secure123")
     session.add(utilisateur)
     session.commit()
 
-    result = session.query(Utilisateur).filter_by(email="alice@example.com").first()
+    result = session.query(Utilisateur)\
+        .filter_by(email="alice@example.com").first()
 
     assert result is not None
     assert result.nom == "Alice"
