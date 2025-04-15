@@ -91,12 +91,17 @@ async def add_user(data: UtilisateurBase, db: Session = Depends(get_db)):
     Paramètres :
         - data: les informations envoyées par l'utilisateur
         - db: la session de bdd actuelle
+
+    Return :
+        - Un message de réponse JSON confirmant ou invalidant l'ajout
     """
     try:
         if data:
             connect()
 
-            utilisateur = db.query(Utilisateur).filter_by(nom=data.nom).first()
+            utilisateur = db.query(
+                Utilisateur
+                ).filter_by(nom=data.nom).first()
 
             if utilisateur:
                 return JSONResponse(
@@ -128,6 +133,54 @@ async def add_user(data: UtilisateurBase, db: Session = Depends(get_db)):
                 }
             ), 400
             
+    except Exception as e:
+        return JSONResponse(content={"message": "Erreur : " + str(e)}), 500
+    
+    finally:
+        diconnect(db)
+
+
+@router.get("/get-all-users")
+async def get_all_users(db: Session = Depends(get_db)):
+    """
+    Route pour récupérer tous les utilisateurs de la bdd
+
+    Paramètres :
+        - db: la session de bdd actuelle
+
+    Return :
+        - Une liste contenant toutes les informations des utilisateurs
+          en JSON
+        - Un message de réponse JSON confirmant ou invalidant la
+          récupération des données
+    """
+    try:
+        connect()
+
+        utilisateurs = db.query(Utilisateur).all()
+
+        if utilisateurs:
+            liste_utilisateurs = [
+                {
+                    "nom": utilisateur.nom,
+                    "email": utilisateur.email,
+                    "pswd": utilisateur.pswd
+                }
+                for utilisateur in utilisateurs
+            ]
+
+            return JSONResponse(content={
+                "data": liste_utilisateurs,
+                "message": "Succès"
+                }
+            ), 200
+
+        return JSONResponse(
+            content={
+                "message": "Erreur : aucun utilisateur trouvé"
+                }
+            ), 404
+
     except Exception as e:
         return JSONResponse(content={"message": "Erreur : " + str(e)}), 500
     

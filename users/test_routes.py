@@ -68,3 +68,17 @@ def test_add_user_no_data():
 
     assert response.status_code == 400
     assert "Erreur" in response.json()["message"]
+
+
+def test_get_all_users_success():
+    response = client.get("/get-all-users")
+
+    assert response.status_code == 200
+    assert "Succès" in response.json()["message"]
+
+
+def test_get_all_users_not_found():
+    response = client.get("/get-all-users")
+
+    assert response.status_code == 404
+    assert "Erreur" in response.json()["message"]
