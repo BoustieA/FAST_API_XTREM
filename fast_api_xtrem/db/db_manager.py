@@ -38,7 +38,7 @@ class DBManager:
         if self.database_url.startswith("sqlite:///"):
             # Obtenir la racine du package
             package_root = self._get_package_root()
-            
+
             # Créer le répertoire database à la racine du package
             database_dir = package_root / "database"
             if not database_dir.exists():
@@ -46,13 +46,13 @@ class DBManager:
                 self.logger.info(
                     f"Création du répertoire pour la base de données: "
                     f"{database_dir}")
-            
+
             # Définir le chemin complet du fichier de base de données
             db_file = database_dir / "app_data.db"
-            
+
             # Mettre à jour l'URL de la base de données avec le chemin absolu
             self.database_url = f"sqlite:///{db_file.absolute()}"
-            
+
             db_exists = db_file.exists()
             if db_exists:
                 self.logger.info(

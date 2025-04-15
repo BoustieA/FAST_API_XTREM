@@ -4,8 +4,8 @@ from typing import Optional
 
 from fastapi import FastAPI
 
-from app.services import ApplicationServices
 from app.config import AppConfig
+from app.services import ApplicationServices
 from app.state import AppState
 from routes.favicon import router_favicon
 from routes.root import router_root

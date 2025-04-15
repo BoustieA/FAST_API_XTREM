@@ -1,5 +1,5 @@
 # routes/favicon.py
-from fastapi import APIRouter, Request, Depends
+from fastapi import APIRouter, Depends, Request
 
 router_favicon = APIRouter()
 
