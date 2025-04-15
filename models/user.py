@@ -1,6 +1,6 @@
 from sqlalchemy import Column, String, Integer
 from sqlalchemy.orm import declarative_base
-from db.db_manager import Base
+from fast_api_xtrem.db.db_manager import Base
 
 
 class Utilisateur(Base):
