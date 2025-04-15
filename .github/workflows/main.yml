@@ -61,16 +61,11 @@ jobs:
       - name: Run tests with coverage
         if: steps.check_tests.outputs.tests_exist == 'true'
         run: |
-          pytest --cov=fast_api_extrem --cov-report=xml tests/
+          mkdir -p coverage  # Ensure the coverage directory exists
+          pytest --cov=fast_api_xtrem --cov-report=xml:coverage/coverage.xml tests/
           # Remplacez 'your_package' par le nom de votre package
           # et 'tests/' par le dossier contenant vos tests [[7]]
 
-      - name: Upload coverage report
-        if: steps.check_tests.outputs.tests_exist == 'true'
-        uses: actions/upload-artifact@latest
-        with:
-          name: coverage-report
-          path: coverage.xml
 
   deploy:
     runs-on: ubuntu-latest
