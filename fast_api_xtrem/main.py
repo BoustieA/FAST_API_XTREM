@@ -11,6 +11,7 @@ from routes.favicon import router_favicon
 from routes.root import router_root
 import uvicorn
 
+
 class Application:
     """Classe représentant l'application FastAPI avec ses services"""
 
