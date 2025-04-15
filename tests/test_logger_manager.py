@@ -1,4 +1,5 @@
 from unittest.mock import patch
+
 from loguru import logger as loguru_logger
 
 from fast_api_xtrem.logger.logger_manager import LoggerManager
@@ -78,7 +79,8 @@ def test_log_file_creation_and_content(monkeypatch, tmp_path):
     """Test d'intégration vérifiant l'écriture dans le fichier de log."""
     # Create a fake module file for testing
     fake_file = tmp_path / "fake_module.py"
-    monkeypatch.setattr("fast_api_xtrem.logger.logger_manager.__file__", str(fake_file))
+    monkeypatch.setattr("fast_api_xtrem.logger.logger_manager.__file__",
+                        str(fake_file))
 
     # Reset LoggerManager instance and initialize it
     LoggerManager._instance = None
@@ -96,4 +98,5 @@ def test_log_file_creation_and_content(monkeypatch, tmp_path):
     log_content = log_file.read_text(encoding="utf-8")
 
     # Assert that the test message is part of the log content
-    assert test_msg in log_content, f"Le message '{test_msg}' doit être dans le fichier de log"
+    assert test_msg in log_content, \
+        f"Le message '{test_msg}' doit être dans le fichier de log"
