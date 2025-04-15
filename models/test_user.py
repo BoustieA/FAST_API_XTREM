@@ -14,6 +14,7 @@ def session():
     yield session
     session.close()
 
+
 def test_create_utilisateur(session):
     utilisateur = Utilisateur(nom="Alice",
                               email="alice@example.com", pswd="secure123")
