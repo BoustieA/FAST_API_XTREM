@@ -4,6 +4,7 @@ from sqlalchemy.orm import declarative_base
 
 Base = declarative_base()
 
+
 class Utilisateur(Base):
     __tablename__ = "Utilisateur"
 
