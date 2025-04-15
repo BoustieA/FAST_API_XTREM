@@ -1,16 +1,17 @@
-import os
+import pathlib
 
 from sqlalchemy import create_engine, inspect
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
-from logger.logger_manager import LoggerManager
+from fast_api_xtrem.logger.logger_manager import LoggerManager
 
 Base = declarative_base()
 
 
 class DBManager:
-    def __init__(self, database_url: str = "sqlite:///./database.db", logger=None):
+    def __init__(self, database_url: str,
+                 logger=None):
         """
         Initialise le gestionnaire de base de données
 
@@ -24,26 +25,43 @@ class DBManager:
         self.logger = logger or LoggerManager()
         self._check_db_file()
 
+    @staticmethod
+    def _get_package_root():
+        """Retourne le chemin racine du package fast_api_xtrem"""
+        # Obtenir le chemin du module courant
+        current_file = pathlib.Path(__file__)
+        # Remonter jusqu'à la racine du package fast_api_xtrem
+        package_root = current_file.parent.parent
+        return package_root
+
     def _check_db_file(self):
         """Vérifie si le fichier de base de données existe, l'extrait de l'URL SQLite"""
         if self.database_url.startswith("sqlite:///"):
-            # Extraire le chemin du fichier de la chaîne de connexion SQLite
-            db_file = self.database_url.replace("sqlite:///", "")
-
-            # Assurez-vous que le répertoire parent existe
-            db_dir = os.path.dirname(db_file)
-            if db_dir and not os.path.exists(db_dir):
-                os.makedirs(db_dir)
-                self.logger.info(f"Création du répertoire pour la base de données: "
-                                 f"{db_dir}")
-
-            db_exists = os.path.exists(db_file)
-
+            # Obtenir la racine du package
+            package_root = self._get_package_root()
+            
+            # Créer le répertoire database à la racine du package
+            database_dir = package_root / "database"
+            if not database_dir.exists():
+                database_dir.mkdir(exist_ok=True)
+                self.logger.info(
+                    f"Création du répertoire pour la base de données: "
+                    f"{database_dir}")
+            
+            # Définir le chemin complet du fichier de base de données
+            db_file = database_dir / "app_data.db"
+            
+            # Mettre à jour l'URL de la base de données avec le chemin absolu
+            self.database_url = f"sqlite:///{db_file.absolute()}"
+            
+            db_exists = db_file.exists()
             if db_exists:
-                self.logger.info(f"Utilisation de la base de données existante: "
-                                 f"{db_file}")
+                self.logger.info(
+                    f"Utilisation de la base de données existante: "
+                    f"{db_file}")
             else:
-                self.logger.info(f"Le fichier de base de données sera créé: {db_file}")
+                self.logger.info(
+                    f"Le fichier de base de données sera créé: {db_file}")
 
     def connect(self):
         """Établit la connexion à la base de données SQLite"""
@@ -51,7 +69,8 @@ class DBManager:
             self.logger.info(f"Tentative de connexion à: {self.database_url}")
             self.engine = create_engine(
                 self.database_url,
-                connect_args={"check_same_thread": False}  # Nécessaire pour SQLite
+                connect_args={"check_same_thread": False}
+                # Nécessaire pour SQLite
             )
 
             # Création des tables si elles n'existent pas
@@ -68,11 +87,13 @@ class DBManager:
                 with conn.begin():
                     pass
 
-            self.logger.success(f"✅ Connecté à la base de données: {self.database_url}")
+            self.logger.success(f"✅ Connecté à la base de données: "
+                                f"{self.database_url}")
             return True
 
         except Exception as e:
-            self.logger.error(f"❌ Erreur de connexion à la base de données: {str(e)}")
+            self.logger.error(
+                f"❌ Erreur de connexion à la base de données: {str(e)}")
             raise
 
     def disconnect(self):
@@ -81,12 +102,14 @@ class DBManager:
             self.engine.dispose()
             self.logger.info("🔌 Déconnexion de la base de données effectuée")
         else:
-            self.logger.warning("Tentative de déconnexion sans connexion active")
+            self.logger.warning(
+                "Tentative de déconnexion sans connexion active")
 
     def get_db(self):
         """Fournit une session de base de données pour les dépendances FastAPI"""
         if not self.SessionLocal:
-            self.logger.error("Tentative d'obtenir une session sans connexion active")
+            self.logger.error(
+                "Tentative d'obtenir une session sans connexion active")
             raise Exception("Base de données non connectée")
 
         db = self.SessionLocal()
@@ -98,7 +121,8 @@ class DBManager:
     def check_tables(self):
         """Vérifie les tables existantes dans la base de données"""
         if not self.engine:
-            self.logger.error("Impossible de vérifier les tables sans connexion active")
+            self.logger.error(
+                "Impossible de vérifier les tables sans connexion active")
             return []
 
         inspector = inspect(self.engine)
@@ -106,5 +130,6 @@ class DBManager:
         if tables:
             self.logger.info(f"Tables existantes: {', '.join(tables)}")
         else:
-            self.logger.info("Aucune table n'existe encore dans la base de données")
+            self.logger.info(
+                "Aucune table n'existe encore dans la base de données")
         return tables
