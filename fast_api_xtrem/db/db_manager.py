@@ -34,7 +34,8 @@ class DBManager:
         return package_root
 
     def _check_db_file(self):
-        """Vérifie si le fichier de base de données existe, l'extrait de l'URL SQLite"""
+        """Vérifie si le fichier de base de données existe,
+        l'extrait de l'URL SQLite"""
         if self.database_url.startswith("sqlite:///"):
             # Obtenir la racine du package
             package_root = self._get_package_root()
@@ -105,7 +106,8 @@ class DBManager:
                 "Tentative de déconnexion sans connexion active")
 
     def get_db(self):
-        """Fournit une session de base de données pour les dépendances FastAPI"""
+        """Fournit une session de base de données
+        pour les dépendances FastAPI"""
         if not self.SessionLocal:
             self.logger.error(
                 "Tentative d'obtenir une session sans connexion active")

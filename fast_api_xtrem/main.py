@@ -49,7 +49,8 @@ class Application:
     @asynccontextmanager
     async def _lifespan(self, fastapi_app: FastAPI):
         """
-        Gestion du cycle de vie de l'application avec initialisation/fermeture des services
+        Gestion du cycle de vie de l'application
+        avec initialisation/fermeture des services
 
         """
         # Initialisation des services

@@ -9,7 +9,8 @@ from fast_api_xtrem.logger.logger_manager import LoggerManager
 class ApplicationServices:
     """
     Classe contenant tous les services de l'application.
-    Fournit un accès centralisé aux différents services et gère leur cycle de vie.
+    Fournit un accès centralisé aux différents services
+    et gère leur cycle de vie.
     """
 
     def __init__(self, config: AppConfig):
@@ -30,7 +31,8 @@ class ApplicationServices:
             self.logger.warning("Services déjà initialisés")
             return
 
-        # Initialisation du logger en premier pour que les autres services puissent l'utiliser
+        # Initialisation du logger en premier
+        # pour que les autres services puissent l'utiliser
         self.logger = LoggerManager()
 
         # Initialisation de la base de données

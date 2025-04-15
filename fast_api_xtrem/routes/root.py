@@ -7,10 +7,10 @@ from fastapi import (
 
 router_root = APIRouter()
 
-# Dépendance pour accéder au logger
 
 def get_logger(request: Request):
     return request.app.state.logger
+
 
 @router_root.get("/", tags=["Root"])
 async def root(logger=Depends(get_logger)):
