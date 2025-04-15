@@ -46,7 +46,7 @@ jobs:
           pip install -r requirements.txt
 
       - name: Install test tools
-        run: pip install pytest coverage  # [[7]][[6]]
+        run: pip install pytest coverage pytest-cov  # Install pytest-cov
 
       - name: Check if tests exist
         id: check_tests
@@ -63,17 +63,3 @@ jobs:
         run: |
           mkdir -p coverage  # Ensure the coverage directory exists
           pytest --cov=fast_api_xtrem --cov-report=xml:coverage/coverage.xml tests/
-          # Remplacez 'your_package' par le nom de votre package
-          # et 'tests/' par le dossier contenant vos tests [[7]]
-
-
-  # deploy:
-  #   runs-on: ubuntu-latest
-  #   needs: [lint, test]  # Dépend des deux jobs précédents
-  #   if: github.ref == 'refs/heads/main'
-  #   steps:
-  #     - name: Checkout code
-  #       uses: actions/checkout@v3
-  #     - name: Placeholder deployment step
-  #       run: echo "Deployment would happen here in a real scenario"
-  #     # Vos étapes de déploiement ici
