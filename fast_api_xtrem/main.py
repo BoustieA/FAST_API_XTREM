@@ -9,7 +9,7 @@ from app.services import ApplicationServices
 from app.state import AppState
 from routes.favicon import router_favicon
 from routes.root import router_root
-
+import uvicorn
 
 class Application:
     """Classe représentant l'application FastAPI avec ses services"""
@@ -74,7 +74,7 @@ class Application:
 
     def run(self):
         """Lance l'application avec uvicorn"""
-        import uvicorn
+
         uvicorn.run(
             self.app,
             host=self.config.host,
