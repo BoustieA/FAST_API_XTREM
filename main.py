@@ -1,5 +1,7 @@
 from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
+
 from db.db_manager import DBManager
 from logger.logger_manager import LoggerManager
 

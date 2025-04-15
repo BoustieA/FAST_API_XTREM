@@ -3,6 +3,7 @@ import os
 from sqlalchemy import create_engine, inspect
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
+
 from logger.logger_manager import LoggerManager
 
 Base = declarative_base()
@@ -33,12 +34,14 @@ class DBManager:
             db_dir = os.path.dirname(db_file)
             if db_dir and not os.path.exists(db_dir):
                 os.makedirs(db_dir)
-                self.logger.info(f"Création du répertoire pour la base de données: {db_dir}")
+                self.logger.info(f"Création du répertoire pour la base de données: "
+                                 f"{db_dir}")
 
             db_exists = os.path.exists(db_file)
 
             if db_exists:
-                self.logger.info(f"Utilisation de la base de données existante: {db_file}")
+                self.logger.info(f"Utilisation de la base de données existante: "
+                                 f"{db_file}")
             else:
                 self.logger.info(f"Le fichier de base de données sera créé: {db_file}")
 
@@ -105,5 +108,3 @@ class DBManager:
         else:
             self.logger.info("Aucune table n'existe encore dans la base de données")
         return tables
-
-# Suppression de la fonction lifespan qui n'est plus nécessaire ici
