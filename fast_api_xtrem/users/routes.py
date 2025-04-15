@@ -2,7 +2,6 @@ from fastapi import APIRouter, Depends
 from fastapi.responses import JSONResponse
 from models.user import UtilisateurBase, Utilisateur
 from sqlalchemy.orm import Session
-from fast_api_xtrem.db.db_manager import DBManager
 from fast_api_xtrem.main import app
 import hashlib
 import os
@@ -15,7 +14,8 @@ router_users = APIRouter()
 # Routes
 ###########
 @router_users.post("/login")
-async def login(data: UtilisateurBase, db: Session = Depends(app.services.db_manager.get_db)):
+async def login(data: UtilisateurBase,
+                db: Session = Depends(app.services.db_manager.get_db)):
     """
     Route pour l'authentification
 
@@ -80,7 +80,8 @@ async def logout():
 
 
 @router_users.post("/add-user")
-async def add_user(data: UtilisateurBase, db: Session = Depends(app.services.db_manager.get_db)):
+async def add_user(data: UtilisateurBase,
+                   db: Session = Depends(app.services.db_manager.get_db)):
     """
     Route pour l'ajout d'un utilisateur dans la bdd
 
@@ -103,13 +104,13 @@ async def add_user(data: UtilisateurBase, db: Session = Depends(app.services.db_
                         "message": "Erreur : nom d'utilisateur déjà existant"
                         }
                     ), 403
-            
+
             hashed_pswd = hashlib.sha256(data.pswd.encode()).hexdigest()
 
             db_utilisateur = Utilisateur(
-                nom = data.nom,
-                email = data.email,
-                pswd = hashed_pswd
+                nom=data.nom,
+                email=data.email,
+                pswd=hashed_pswd
             )
 
             db.add(db_utilisateur)
@@ -120,19 +121,20 @@ async def add_user(data: UtilisateurBase, db: Session = Depends(app.services.db_
                     "message": "Succès : nouvel utilisateur enregistré"
                     }
                 ), 200
-        
+
         return JSONResponse(
             content={
                 "message": "Erreur : aucunes données envoyées"
                 }
             ), 400
-            
+
     except Exception as e:
         return JSONResponse(content={"message": "Erreur : " + str(e)}), 500
 
 
 @router_users.get("/get-all-users")
-async def get_all_users(db: Session = Depends(app.services.db_manager.get_db)):
+async def get_all_users(db: Session = Depends(
+                                    app.services.db_manager.get_db)):
     """
     Route pour récupérer tous les utilisateurs de la bdd
 
@@ -175,7 +177,8 @@ async def get_all_users(db: Session = Depends(app.services.db_manager.get_db)):
 
 
 @router_users.post("/update-user")
-async def update_user(data: UtilisateurBase, db: Session = Depends(app.services.db_manager.get_db)):
+async def update_user(data: UtilisateurBase,
+                      db: Session = Depends(app.services.db_manager.get_db)):
     """
     Route pour mettre à jour les données d'un utilisateur
 
@@ -192,7 +195,7 @@ async def update_user(data: UtilisateurBase, db: Session = Depends(app.services.
             utilisateur = db.query(
                 Utilisateur
                 ).filter_by(nom=data.nom).first()
-            
+
             if utilisateur:
                 hashed_pswd = hashlib.sha256(data.pswd.encode()).hexdigest()
 
@@ -207,19 +210,19 @@ async def update_user(data: UtilisateurBase, db: Session = Depends(app.services.
                         "message": "Succès : mise à jour réussie"
                         }
                     ), 200
-            
+
             return JSONResponse(
                 content={
                     "message": "Erreur : aucun utilisateur trouvé"
                     }
                 ), 404
-        
+
         return JSONResponse(
             content={
                 "message": "Erreur : aucunes données envoyées"
                 }
             ), 400
-    
+
     except Exception as e:
         return JSONResponse(content={"message": "Erreur : " + str(e)}), 500
 
@@ -249,18 +252,18 @@ async def delete_user(data: UtilisateurBase, db: Session = Depends(app.services.
                         "message": "Succès : utilisateur supprimé"
                         }
                     ), 200
-            
+
             return JSONResponse(
                 content={
                     "message": "Erreur : aucun utilisateur trouvé"
                     }
                 ), 404
-        
+
         return JSONResponse(
             content={
                 "message": "Erreur : aucunes données envoyées"
                 }
             ), 400
-    
+
     except Exception as e:
         return JSONResponse(content={"message": "Erreur : " + str(e)}), 500
