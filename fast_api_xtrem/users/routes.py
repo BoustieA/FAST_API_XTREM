@@ -228,7 +228,8 @@ async def update_user(data: UtilisateurBase,
 
 
 @router_users.post("/delete-user")
-async def delete_user(data: UtilisateurBase, db: Session = Depends(app.services.db_manager.get_db)):
+async def delete_user(data: UtilisateurBase,
+                      db: Session = Depends(app.services.db_manager.get_db)):
     """
     Route pour supprimer un utilisateur de la bdd
 
