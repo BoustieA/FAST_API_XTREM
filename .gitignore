@@ -232,3 +232,4 @@ Thumbs.db
 
 # Other
 out/
+/coverage/
