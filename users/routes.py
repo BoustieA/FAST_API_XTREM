@@ -121,6 +121,12 @@ async def add_user(data: UtilisateurBase, db: Session = Depends(get_db)):
                     "message": "Succès : nouvel utilisateur enregistré"
                     }
                 ), 200
+        
+        return JSONResponse(
+            content={
+                "message": "Erreur : aucunes données envoyées"
+                }
+            ), 400
             
     except Exception as e:
         return JSONResponse(content={"message": "Erreur : " + str(e)}), 500

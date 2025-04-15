@@ -41,3 +41,30 @@ def test_login_no_data():
 
     assert response.status_code == 400
     assert "Erreur" in response.json()["message"]
+
+
+def test_add_user_success():
+    data = {"nom": "John", "email": "john@gmail.com", "pswd": "secure123"}
+
+    response = client.post("/add-user", json=data)
+
+    assert response.status_code == 200
+    assert "Succès" in response.json()["message"]
+
+
+def test_add_user_already_exists():
+    data = {"nom": "Alice", "email": "alice@gmail.com", "pswd": "secure123"}
+
+    response = client.post("/add-user", json=data)
+
+    assert response.status_code == 403
+    assert "Erreur" in response.json()["message"]
+
+
+def test_add_user_no_data():
+    data = {}
+
+    response = client.post("/add-user", json=data)
+
+    assert response.status_code == 400
+    assert "Erreur" in response.json()["message"]
