@@ -1,9 +1,14 @@
 # routes/root.py
-from fastapi import APIRouter, Depends, Request
+from fastapi import (
+    APIRouter,
+    Depends,
+    Request
+)
 
 router_root = APIRouter()
 
 # Dépendance pour accéder au logger
+
 def get_logger(request: Request):
     return request.app.state.logger
 

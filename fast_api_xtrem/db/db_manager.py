@@ -10,10 +10,9 @@ Base = declarative_base()
 
 
 class DBManager:
-    def __init__(self, database_url: str,
-                 logger=None):
+    def __init__(self, database_url: str, logger=None):
         """
-        Initialise le gestionnaire de base de données
+        Initialise le gestionnaire de base de données.
 
         Args:
             database_url: URL de connexion à la base de données SQLite
