@@ -109,3 +109,30 @@ def test_update_user_no_data():
 
     assert response.status_code == 400
     assert "Erreur" in response.json()["message"]
+
+
+def test_delete_user_success():
+    data = {"nom": "John", "email": "john@gmail.com", "pswd": "secure123"}
+
+    response = client.post("/delete-user", json=data)
+
+    assert response.status_code == 200
+    assert "Succès" in response.json()["message"]
+
+
+def test_delete_user_not_found():
+    data = {"nom": "Jack", "email": "jack@gmail.com", "pswd": "secure123"}
+
+    response = client.post("/delete-user", json=data)
+
+    assert response.status_code == 404
+    assert "Erreur" in response.json()["message"]
+
+
+def test_delete_user_no_data():
+    data = {}
+
+    response = client.post("/delete-user", json=data)
+
+    assert response.status_code == 400
+    assert "Erreur" in response.json()["message"]

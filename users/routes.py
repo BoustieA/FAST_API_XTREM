@@ -2,19 +2,20 @@ from fastapi import APIRouter, Depends
 from fastapi.responses import JSONResponse
 from models.user import UtilisateurBase, Utilisateur
 from sqlalchemy.orm import Session
-from db.db_manager import connect, diconnect, get_db
+from db.db_manager import DBManager
 import hashlib
 import os
 
 
 router = APIRouter()
+db = DBManager()
 
 
 ###########
 # Routes
 ###########
 @router.post("/login")
-async def login(data: UtilisateurBase, db: Session = Depends(get_db)):
+async def login(data: UtilisateurBase, db: Session = Depends(db.get_db)):
     """
     Route pour l'authentification
 
@@ -30,8 +31,6 @@ async def login(data: UtilisateurBase, db: Session = Depends(get_db)):
         if data:
             nom = data.nom
             pswd = data.pswd
-
-            connect()
 
             utilisateur = db.query(Utilisateur).filter_by(nom=nom).first()
 
@@ -71,9 +70,6 @@ async def login(data: UtilisateurBase, db: Session = Depends(get_db)):
     except Exception as e:
         return JSONResponse(content={"message": "Erreur : " + str(e)}), 500
 
-    finally:
-        diconnect(db)
-
 
 @router.post("/logout")
 async def logout():
@@ -84,7 +80,7 @@ async def logout():
 
 
 @router.post("/add-user")
-async def add_user(data: UtilisateurBase, db: Session = Depends(get_db)):
+async def add_user(data: UtilisateurBase, db: Session = Depends(db.get_db)):
     """
     Route pour l'ajout d'un utilisateur dans la bdd
 
@@ -97,8 +93,6 @@ async def add_user(data: UtilisateurBase, db: Session = Depends(get_db)):
     """
     try:
         if data:
-            connect()
-
             utilisateur = db.query(
                 Utilisateur
                 ).filter_by(nom=data.nom).first()
@@ -135,13 +129,10 @@ async def add_user(data: UtilisateurBase, db: Session = Depends(get_db)):
             
     except Exception as e:
         return JSONResponse(content={"message": "Erreur : " + str(e)}), 500
-    
-    finally:
-        diconnect(db)
 
 
 @router.get("/get-all-users")
-async def get_all_users(db: Session = Depends(get_db)):
+async def get_all_users(db: Session = Depends(db.get_db)):
     """
     Route pour récupérer tous les utilisateurs de la bdd
 
@@ -155,8 +146,6 @@ async def get_all_users(db: Session = Depends(get_db)):
           récupération des données
     """
     try:
-        connect()
-
         utilisateurs = db.query(Utilisateur).all()
 
         if utilisateurs:
@@ -183,17 +172,15 @@ async def get_all_users(db: Session = Depends(get_db)):
 
     except Exception as e:
         return JSONResponse(content={"message": "Erreur : " + str(e)}), 500
-    
-    finally:
-        diconnect(db)
 
 
 @router.post("/update-user")
-async def update_user(data: UtilisateurBase, db: Session = Depends(get_db)):
+async def update_user(data: UtilisateurBase, db: Session = Depends(db.get_db)):
     """
     Route pour mettre à jour les données d'un utilisateur
 
     Paramètres :
+        - data: les informations envoyées par l'utilisateur
         - db: la session de bdd actuelle
 
     Return :
@@ -202,8 +189,6 @@ async def update_user(data: UtilisateurBase, db: Session = Depends(get_db)):
     """
     try:
         if data:
-            connect()
-
             utilisateur = db.query(
                 Utilisateur
                 ).filter_by(nom=data.nom).first()
@@ -237,6 +222,45 @@ async def update_user(data: UtilisateurBase, db: Session = Depends(get_db)):
     
     except Exception as e:
         return JSONResponse(content={"message": "Erreur : " + str(e)}), 500
+
+
+@router.post("/delete-user")
+async def delete_user(data: UtilisateurBase, db: Session = Depends(db.get_db)):
+    """
+    Route pour supprimer un utilisateur de la bdd
+
+    Paramètres :
+        - db: la session de bdd actuelle
+
+    Return :
+        - Un message de réponse JSON confirmant ou invalidant la
+          mise à jour des données
+    """
+    try:
+        if data:
+            utilisateur = db.query(Utilisateur).filter_by(nom=data.nom).first()
+
+            if utilisateur:
+                db.query(Utilisateur).filter_by(nom=data.nom).delete()
+                db.commit()
+
+                return JSONResponse(
+                    content={
+                        "message": "Succès : utilisateur supprimé"
+                        }
+                    ), 200
+            
+            return JSONResponse(
+                content={
+                    "message": "Erreur : aucun utilisateur trouvé"
+                    }
+                ), 404
+        
+        return JSONResponse(
+            content={
+                "message": "Erreur : aucunes données envoyées"
+                }
+            ), 400
     
-    finally:
-        diconnect(db)
+    except Exception as e:
+        return JSONResponse(content={"message": "Erreur : " + str(e)}), 500
