@@ -82,3 +82,30 @@ def test_get_all_users_not_found():
 
     assert response.status_code == 404
     assert "Erreur" in response.json()["message"]
+
+
+def test_update_user_success():
+    data = {"nom": "Alice", "email": "alice.lidell@gmail.com", "pswd": "secure123"}
+
+    response = client.post("/update-user", json=data)
+
+    assert response.status_code == 200
+    assert "Succès" in response.json()["message"]
+
+
+def test_update_user_not_found():
+    data = {"nom": "Bob", "email": "bob@gmail.com", "pswd": "secure123"}
+
+    response = client.post("/update-user", json=data)
+
+    assert response.status_code == 404
+    assert "Erreur" in response.json()["message"]
+
+
+def test_update_user_no_data():
+    data = {}
+
+    response = client.post("/update-user", json=data)
+
+    assert response.status_code == 400
+    assert "Erreur" in response.json()["message"]

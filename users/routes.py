@@ -186,3 +186,57 @@ async def get_all_users(db: Session = Depends(get_db)):
     
     finally:
         diconnect(db)
+
+
+@router.post("/update-user")
+async def update_user(data: UtilisateurBase, db: Session = Depends(get_db)):
+    """
+    Route pour mettre à jour les données d'un utilisateur
+
+    Paramètres :
+        - db: la session de bdd actuelle
+
+    Return :
+        - Un message de réponse JSON confirmant ou invalidant la
+          mise à jour des données
+    """
+    try:
+        if data:
+            connect()
+
+            utilisateur = db.query(
+                Utilisateur
+                ).filter_by(nom=data.nom).first()
+            
+            if utilisateur:
+                hashed_pswd = hashlib.sha256(data.pswd.encode()).hexdigest()
+
+                utilisateur.nom = data.nom,
+                utilisateur.email = data.email,
+                utilisateur.pswd = hashed_pswd
+
+                db.commit()
+
+                return JSONResponse(
+                    content={
+                        "message": "Succès : mise à jour réussie"
+                        }
+                    ), 200
+            
+            return JSONResponse(
+                content={
+                    "message": "Erreur : aucun utilisateur trouvé"
+                    }
+                ), 404
+        
+        return JSONResponse(
+            content={
+                "message": "Erreur : aucunes données envoyées"
+                }
+            ), 400
+    
+    except Exception as e:
+        return JSONResponse(content={"message": "Erreur : " + str(e)}), 500
+    
+    finally:
+        diconnect(db)
