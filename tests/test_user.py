@@ -1,7 +1,7 @@
 import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from user import Utilisateur, Base
+from fast_api_xtrem.models.user import Utilisateur, Base
 
 
 # Fixture for setting up and tearing down the database
