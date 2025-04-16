@@ -4,12 +4,8 @@ import sys
 from contextlib import asynccontextmanager
 from typing import Optional
 
+import uvicorn
 from fastapi import FastAPI
-
-# Add the project root to the Python path
-# This is crucial for resolving imports correctly
-PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sys.path.insert(0, PROJECT_ROOT)
 
 from fast_api_xtrem.app.config import AppConfig
 from fast_api_xtrem.app.services import ApplicationServices
@@ -17,7 +13,11 @@ from fast_api_xtrem.app.state import AppState
 from fast_api_xtrem.routes.app.favicon import router_favicon
 from fast_api_xtrem.routes.app.root import router_root
 from fast_api_xtrem.routes.db.users import router_users
-import uvicorn
+
+# Add the project root to the Python path
+# This is crucial for resolving imports correctly
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, PROJECT_ROOT)
 
 
 class Application:
