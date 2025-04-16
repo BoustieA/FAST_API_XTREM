@@ -1,7 +1,9 @@
 import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from fast_api_xtrem.models.user import Utilisateur, Base
+
+from fast_api_xtrem.db.base import Base
+from fast_api_xtrem.db.models.user import User
 
 
 # Fixture for setting up and tearing down the database
@@ -15,13 +17,13 @@ def session():
     session.close()
 
 
-def test_create_utilisateur(session):
-    utilisateur = Utilisateur(nom="Alice",
-                              email="alice@example.com", pswd="secure123")
+def test_create_user(session):
+    utilisateur = User(nom="Alice",
+                       email="alice@example.com", pswd="secure123")
     session.add(utilisateur)
     session.commit()
 
-    result = session.query(Utilisateur)\
+    result = session.query(User) \
         .filter_by(email="alice@example.com").first()
 
     assert result is not None

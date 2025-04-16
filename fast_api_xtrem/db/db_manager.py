@@ -1,12 +1,10 @@
 import pathlib
 
 from sqlalchemy import create_engine, inspect
-from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
+from fast_api_xtrem.db.base import Base
 from fast_api_xtrem.logger.logger_manager import LoggerManager
-
-Base = declarative_base()
 
 
 class DBManager:
@@ -63,6 +61,15 @@ class DBManager:
                 self.logger.info(
                     f"Le fichier de base de données sera créé: {db_file}")
 
+    def _create_tables(self):
+        self.logger.info("Création des tables")
+        from fast_api_xtrem.db.models.user import User
+        # Référencer User pour éviter l'erreur d'importation non utilisée
+        self.logger.info(f"Modèle chargé: {User.__name__}")
+        for table_name in Base.metadata.tables.keys():
+            self.logger.info(f"Création de la table: {table_name}")
+        Base.metadata.create_all(bind=self.engine)
+
     def connect(self):
         """Établit la connexion à la base de données SQLite"""
         try:
@@ -74,7 +81,7 @@ class DBManager:
             )
 
             # Création des tables si elles n'existent pas
-            Base.metadata.create_all(bind=self.engine)
+            self._create_tables()
 
             self.SessionLocal = sessionmaker(
                 autocommit=False,
