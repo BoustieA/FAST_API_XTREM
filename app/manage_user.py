@@ -1,5 +1,14 @@
 import requests
+from email_validator import validate_email, EmailNotValidError
 
+
+def check_email_valid(mail):
+    try:
+        valid = validate_email(mail)
+        return True
+    except EmailNotValidError as e:
+        # L’email est invalide
+        return False
 
 API_adress = "http://127.0.0.1:8000"
 
@@ -15,26 +24,43 @@ def check_authentity(nom, pswd):
 
 
 def user_exist(nom):
-    json = {"nom": nom, "pswd": ""}
-    response = requests.post(API_adress + "/login", json=json)
-    code = response.status_code
-    if code == 401:
-        return True
+    response = requests.get(API_adress + "/users")
+    data = response.json()
+    users = data.get("data", [])
+    if not users:
+        return False
+    for user in users:
+        if user.get("nom") == nom:
+            return True
     return False
 
 
 def create_user(nom, pswd, mail):
     json = {"nom": nom, "email": mail, "pswd": pswd}
-    requests.post(API_adress + "/add_user", json=json)
+    requests.post(API_adress + "/users", json=json)
 
 
 def email_exist(mail):
-    json = {"email": mail}
-    return requests.post(API_adress + "/mail_exist", json=json)
+    response = requests.get(API_adress + "/users")
+    data = response.json()
+    users = data.get("data", [])
+    if not users:
+        return False
+    for user in users:
+        if user.get("email") == mail:
+            return True
+    return False
 
 
 def update_pswd(pswd, mail):
-    json = {"nom": "", "mail": mail, "pswd": ""}
+    response = requests.get(API_adress + "/users")
+    data = response.json()
+    users = data.get("data", [])
+    for user in users:
+        if user.get("email") == mail:
+            nom=user.get("nom")        
+    json = {"nom": nom, "email": mail, "pswd": pswd}
+    #requete nom par mail puis update
     nom = requests.post(API_adress + "/get_name_from_mail", json=json)
     json = {"nom": nom, "mail": mail, "pswd": pswd}
     requests.post(API_adress + "/update-user", json)

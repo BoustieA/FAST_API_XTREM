@@ -2,7 +2,7 @@ import streamlit as st
 import logging
 from manage_user import check_authentity, \
     user_exist, create_user, check_pswd_security_level, \
-    email_exist, update_pswd
+    email_exist, update_pswd, check_email_valid
 # --- Setup logging ---
 logging.basicConfig(level=logging.INFO)
 
@@ -62,7 +62,8 @@ if not st.session_state.pswd_check:
                         new_password = st.text_input("Nouveau mot de passe",
                                                      type="password")
                         if new_password:
-                            if check_pswd_security_level(new_password) < 3:
+                            if check_pswd_security_level(new_password) < 3\
+                                    or len(password)<8:
                                 st.warning("Mot de passe trop faible.")
                             else:
                                 update_pswd(new_password, email)
@@ -85,22 +86,26 @@ if not st.session_state.pswd_check:
             if email_exist(email):
                 st.error("Email déjà utilisé.")
             else:
-                username = st.text_input("Nom d'utilisateur",
-                                         key="signup_username")
-                if username:
-                    if user_exist(username):
-                        st.error("Nom d'utilisateur déjà utilisé.")
-                    else:
-                        password = st.text_input("Mot de passe",
-                                                 type="password",
-                                                 key="signup_password")
-                        if password:
-                            if check_pswd_security_level(password) < 3:
-                                st.warning("Mot de passe trop faible.")
-                            else:
-                                create_user(username, password, email)
-                                st.success("Compte créé avec succès 🎉")
-                                st.balloons()
+                if check_email_valid(email):
+                    username = st.text_input("Nom d'utilisateur",
+                                            key="signup_username")
+                    if username:
+                        if user_exist(username):
+                            st.error("Nom d'utilisateur déjà utilisé.")
+                        else:
+                            password = st.text_input("Mot de passe",
+                                                    type="password",
+                                                    key="signup_password")
+                            if password:
+                                if check_pswd_security_level(password) < 3\
+                                    or len(password)<8:
+                                    st.warning("Mot de passe trop faible.\nAu moins 8 caractere dont 1 chiffre et un spécial")
+                                else:
+                                    create_user(username, password, email)
+                                    st.success("Compte créé avec succès 🎉")
+                                    st.balloons()
+                else:
+                    st.error("Email non valide")
 
 # --- SI CONNECTÉ ---
 else:
