@@ -94,12 +94,13 @@ if not st.session_state.pswd_check:
                             st.error("Nom d'utilisateur déjà utilisé.")
                         else:
                             password = st.text_input("Mot de passe",
-                                                    type="password",
-                                                    key="signup_password")
+                                                        type="password",
+                                                        key="signup_password")
                             if password:
                                 if check_pswd_security_level(password) < 3\
                                     or len(password) < 8:
-                                    st.warning("Mot de passe trop faible.\nAu moins 8 caractere dont 1 chiffre et un spécial")
+                                    st.warning("Mot de passe trop faible.\n"\
+                                    "Au moins 8 caractere dont 1 chiffre et un spécial")
                                 else:
                                     create_user(username, password, email)
                                     st.success("Compte créé avec succès 🎉")
