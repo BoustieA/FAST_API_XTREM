@@ -67,6 +67,7 @@ def test_info_method_calls_loguru(mocker):
     # Ignorer les appels internes en filtrant sur le dernier appel
     assert spy_info.call_args_list[-1] == mocker.call(test_msg)
 
+
 def test_error_method_calls_loguru(mocker):
     """Vérifie que LoggerManager.error() appelle loguru.error()."""
     mock_error = mocker.patch.object(loguru_logger, "error")
