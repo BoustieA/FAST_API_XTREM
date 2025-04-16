@@ -34,7 +34,7 @@ async def login(data, db: Session = Depends(app.services.db_manager.get_db)):
                 ):
                     return JSONResponse(
                         content=
-                        {"message": "Succès : utilisateur authentifié"},
+                        {"message":"Succès : utilisateur authentifié"},
                         status_code=200)
 
                 return JSONResponse(
@@ -43,17 +43,16 @@ async def login(data, db: Session = Depends(app.services.db_manager.get_db)):
                          "Erreur : utilisateur ou mot de passe incorrect"},
                     status_code=401)
 
-            return JSONResponse(content={"message":
-                                             "Erreur : "
+            return JSONResponse(content={"message":"Erreur : "
                                              "utilisateur non trouvé"},
                                 status_code=404)
 
         return JSONResponse(
-            content={"message": "Erreur : aucunes données envoyées"},
+            content={"message":"Erreur : aucunes données envoyées"},
             status_code=400)
 
     except Exception as e:
-        return JSONResponse(content={"message": "Erreur : " + str(e)},
+        return JSONResponse(content={"message":"Erreur : " + str(e)},
                             status_code=500)
 
 
@@ -63,9 +62,10 @@ async def logout():
     Route pour la déconnexion
     """
     # Here you can implement logic to invalidate the user's session or token
-    # For example, if using JWT, you could blacklist the token or inform the client to delete it.
+    # For example, if using JWT,
+    # you could blacklist the token or inform the client to delete it.
 
-    return JSONResponse(content={"message": "Succès : déconnexion réussie"},
+    return JSONResponse(content={"message":"Succès : déconnexion réussie"},
                         status_code=200)
 
 
