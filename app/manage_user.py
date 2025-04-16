@@ -2,20 +2,21 @@ import requests
 from email_validator import validate_email, EmailNotValidError
 
 
+API_ADRESS = "http://127.0.0.1:8000"
+
+
 def check_email_valid(mail):
     try:
-        valid = validate_email(mail)
+        validate_email(mail)
         return True
-    except EmailNotValidError as e:
+    except EmailNotValidError:
         # L’email est invalide
         return False
-
-API_adress = "http://127.0.0.1:8000"
 
 
 def check_authentity(nom, pswd):
     json = {"nom": nom, "pswd": pswd}
-    response = requests.post(API_adress + "/login", json=json)
+    response = requests.post(API_ADRESS + "/login", json=json)
     code = response.status_code
     if code == 200:
         return True
@@ -24,7 +25,7 @@ def check_authentity(nom, pswd):
 
 
 def user_exist(nom):
-    response = requests.get(API_adress + "/users")
+    response = requests.get(API_ADRESS + "/users")
     data = response.json()
     users = data.get("data", [])
     if not users:
@@ -37,11 +38,11 @@ def user_exist(nom):
 
 def create_user(nom, pswd, mail):
     json = {"nom": nom, "email": mail, "pswd": pswd}
-    requests.post(API_adress + "/users", json=json)
+    requests.post(API_ADRESS + "/users", json=json)
 
 
 def email_exist(mail):
-    response = requests.get(API_adress + "/users")
+    response = requests.get(API_ADRESS + "/users")
     data = response.json()
     users = data.get("data", [])
     if not users:
@@ -53,17 +54,17 @@ def email_exist(mail):
 
 
 def update_pswd(pswd, mail):
-    response = requests.get(API_adress + "/users")
+    response = requests.get(API_ADRESS + "/users")
     data = response.json()
     users = data.get("data", [])
     for user in users:
         if user.get("email") == mail:
-            nom=user.get("nom")        
+            nom = user.get("nom")        
     json = {"nom": nom, "email": mail, "pswd": pswd}
     #requete nom par mail puis update
-    nom = requests.post(API_adress + "/get_name_from_mail", json=json)
+    nom = requests.post(API_ADRESS + "/get_name_from_mail", json=json)
     json = {"nom": nom, "mail": mail, "pswd": pswd}
-    requests.post(API_adress + "/update-user", json)
+    requests.post(API_ADRESS + "/update-user", json)
 
 
 def check_pswd_security_level(mdp):
