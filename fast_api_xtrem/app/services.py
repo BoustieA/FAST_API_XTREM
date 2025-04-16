@@ -4,7 +4,6 @@ from typing import Optional
 from fast_api_xtrem.app.config import AppConfig
 from fast_api_xtrem.db.db_manager import DBManager
 from fast_api_xtrem.logger.logger_manager import LoggerManager
-from fast_api_xtrem.db.models.user import User
 
 
 class ApplicationServices:

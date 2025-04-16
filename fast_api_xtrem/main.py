@@ -7,8 +7,8 @@ from fastapi import FastAPI
 from app.config import AppConfig
 from app.services import ApplicationServices
 from app.state import AppState
-from routes.favicon import router_favicon
-from routes.root import router_root
+from fast_api_xtrem.routes.app.favicon import router_favicon
+from fast_api_xtrem.routes.app.root import router_root
 import uvicorn
 
 

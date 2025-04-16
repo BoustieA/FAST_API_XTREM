@@ -233,3 +233,4 @@ Thumbs.db
 # Other
 out/
 /coverage/
+/fast_api_xtrem/database/app_data.db
