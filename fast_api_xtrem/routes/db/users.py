@@ -9,7 +9,9 @@ from sqlalchemy.orm import Session
 from fast_api_xtrem.db.models.user import User
 from fast_api_xtrem.main import app
 
+
 router_users = APIRouter()
+
 
 # À retirer quand les modèles Pydantic seront implémentés
 # Modèles Pydantic pour la validation des données
@@ -32,7 +34,8 @@ class UserResponse(BaseModel):
 # Fonctions utilitaires
 def create_response(message: str, status_code: int,
                     data: Optional[Any] = None) -> JSONResponse:
-    """Crée une réponse JSON standard avec un message et des données optionnelles"""
+    """Crée une réponse JSON standard
+    avec un message et des données optionnelles"""
     content = {"message": message}
     if data is not None:
         content["data"] = data
@@ -80,7 +83,7 @@ async def login(data: UserLogin,
 
     return create_response(
         "Erreur : utilisateur ou mot de passe incorrect",
-                           401)
+        401)
 
 
 @router_users.post("/logout")
