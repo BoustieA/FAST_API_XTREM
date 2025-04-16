@@ -118,6 +118,7 @@ async def add_user(data: UserCreate, db: Session = Depends(db_get.get_db)):
         data={"nom": db_user.nom, "email": db_user.email},
     )
 
+
 @router_users.get("/users")  # Changed endpoint
 async def get_all_users(db: Session = Depends(db_get.get_db)):
     """Route pour récupérer tous les utilisateurs de la bdd"""
