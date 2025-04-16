@@ -15,20 +15,18 @@ def test_singleton_pattern():
 
 def test_logs_directory_creation(monkeypatch, tmp_path):
     """Teste la création du répertoire de logs."""
-    # Get the parent directory of tmp_path to match the actual behavior
-    parent_dir = tmp_path.parent
-
     # Mock du __file__ pour contrôler l'emplacement des logs
     fake_file = tmp_path / "fake_module.py"
     monkeypatch.setattr("fast_api_xtrem.logger.logger_manager.__file__",
-                        str(fake_file))
+                       str(fake_file))
 
     LoggerManager._instance = None
     manager = LoggerManager()
 
     assert manager.logs_dir.exists(), "Le répertoire de logs doit être créé"
-    # Check against parent_dir instead of tmp_path
-    assert manager.logs_dir == parent_dir / "logs", "Chemin des logs incorrect"
+    # Vérifier que le répertoire est bien dans le dossier parent de tmp_path.parent
+    expected_logs_dir = tmp_path.parent.parent / "logs"
+    assert manager.logs_dir == expected_logs_dir, "Chemin des logs incorrect"
 
 
 def test_info_method_calls_loguru(mocker):
