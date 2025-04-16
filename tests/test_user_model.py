@@ -8,9 +8,11 @@ from fast_api_xtrem.db.base import Base
 @pytest.fixture(scope="function")
 def session():
     # Crée une base SQLite en mémoire
-    engine = create_engine("sqlite:///:memory:", connect_args={"check_same_thread": False})
+    engine = create_engine(
+        "sqlite:///:memory:", connect_args={"check_same_thread": False})
     Base.metadata.create_all(engine)
-    TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+    TestingSessionLocal = sessionmaker(
+        autocommit=False, autoflush=False, bind=engine)
     db = TestingSessionLocal()
     try:
         yield db
