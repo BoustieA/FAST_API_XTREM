@@ -3,7 +3,7 @@ from typing import Any, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel, EmailStr, constr
+from pydantic import BaseModel, constr, EmailStr
 from sqlalchemy.orm import Session
 
 from fast_api_xtrem.db.models.user import User
@@ -22,7 +22,6 @@ def create_response(message: str, status_code: int,
     return JSONResponse(content=content, status_code=status_code)
 
 
-
 def hash_password(password: str) -> str:
     """Hash le mot de passe avec SHA-256"""
     return hashlib.sha256(password.encode()).hexdigest()
@@ -31,7 +30,6 @@ def hash_password(password: str) -> str:
 def get_user_by_name(db: Session, nom: str) -> Optional[User]:
     """Récupère un utilisateur par son nom"""
     return db.query(User).filter_by(nom=nom).first()
-
 
 
 # Pydantic Models for request validation
@@ -45,10 +43,11 @@ class UserCreate(BaseModel):
     email: EmailStr
     pswd: constr(min_length=8)
 
+
 class UserUpdate(BaseModel):
     nom: constr(min_length=1, max_length=50)
     email: EmailStr
-    pswd: constr(min_length=8) # added pswd
+    pswd: constr(min_length=8)  # added pswd
 
 
 # Routes
@@ -73,7 +72,6 @@ async def login(data: UserLogin, db: Session = Depends(lambda: ...)):
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Erreur : utilisateur ou mot de passe incorrect",
     )
-
 
 
 @router_users.post("/logout")
@@ -112,8 +110,7 @@ async def add_user(data: UserCreate, db: Session = Depends(lambda: ...)):
     )
 
 
-
-@router_users.get("/users") # Changed endpoint
+@router_users.get("/users")  # Changed endpoint
 async def get_all_users(db: Session = Depends(lambda: ...)):
     """Route pour récupérer tous les utilisateurs de la bdd"""
     users = db.query(User).all()
@@ -126,7 +123,6 @@ async def get_all_users(db: Session = Depends(lambda: ...)):
 
     user_list = [{"nom": user.nom, "email": user.email} for user in users]
     return create_response("Succès", status.HTTP_200_OK, user_list)
-
 
 
 @router_users.put("/users/{nom}")
@@ -149,11 +145,10 @@ async def update_user(
                    "correspond pas au nom d'utilisateur dans les données",
         )
     user.email = data.email
-    user.pswd = hash_password(data.pswd) #Hash the password.
+    user.pswd = hash_password(data.pswd)  # Hash the password.
     db.commit()
     return create_response("Succès : mise à jour réussie",
                            status.HTTP_200_OK)
-
 
 
 @router_users.delete("/users/{nom}")
