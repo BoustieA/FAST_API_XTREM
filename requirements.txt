@@ -4,5 +4,6 @@ loguru>=0.7.0
 starlette~=0.46.2
 uvicorn~=0.34.1
 pytest
+streamlit
 pytest-cov
 pytest-mock
