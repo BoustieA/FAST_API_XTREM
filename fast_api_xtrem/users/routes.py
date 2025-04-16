@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends
 from fastapi.responses import JSONResponse
-from models.user import UtilisateurBase, Utilisateur
+from fast_api_xtrem.models.user import UtilisateurBase, Utilisateur
 from sqlalchemy.orm import Session
 from fast_api_xtrem.main import app
 import hashlib
