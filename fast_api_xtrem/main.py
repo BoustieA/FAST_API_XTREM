@@ -88,7 +88,8 @@ class Application:
         uvicorn.run(
             self.app,
             host=self.config.host,
-            port=self.config.port
+            port=self.config.port,
+            reload=True
         )
 
 
