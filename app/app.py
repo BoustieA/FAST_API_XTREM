@@ -63,7 +63,7 @@ if not st.session_state.pswd_check:
                                                      type="password")
                         if new_password:
                             if check_pswd_security_level(new_password) < 3\
-                                    or len(password) < 8:
+                                    or len(new_password) < 8:
                                 st.warning("Mot de passe trop faible.")
                             else:
                                 update_pswd(new_password, email)
@@ -88,14 +88,14 @@ if not st.session_state.pswd_check:
             else:
                 if check_email_valid(email):
                     username = st.text_input("Nom d'utilisateur",
-                                                key="signup_username")
+                                             key="signup_username")
                     if username:
                         if user_exist(username):
                             st.error("Nom d'utilisateur déjà utilisé.")
                         else:
                             password = st.text_input("Mot de passe",
-                                                        type="password",
-                                                        key="signup_password")
+                                                    type="password",
+                                                    key="signup_password")
                             if password:
                                 if check_pswd_security_level(password) < 3\
                                     or len(password) < 8:
