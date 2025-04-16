@@ -9,6 +9,7 @@ from app.services import ApplicationServices
 from app.state import AppState
 from fast_api_xtrem.routes.app.favicon import router_favicon
 from fast_api_xtrem.routes.app.root import router_root
+from fast_api_xtrem.routes.db.users import router_users
 import uvicorn
 
 
@@ -44,6 +45,7 @@ class Application:
         # Inclusion des routes
         fastapi_app.include_router(router_root)
         fastapi_app.include_router(router_favicon)
+        fastapi_app.include_router(router_users)
 
         return fastapi_app
 
