@@ -1,8 +1,10 @@
 """
 Test suite for the LoggerManager class.
 
-This module contains unit tests to verify the functionality of the LoggerManager,
-including its singleton behavior, log directory creation, integration with loguru,
+This module contains unit tests to verify the functionality
+of the LoggerManager,
+including its singleton behavior, log directory creation,
+integration with loguru,
 and proper logging to files.
 """
 
@@ -36,7 +38,7 @@ def test_logs_directory_creation(monkeypatch, tmp_path):
 
     Vérifie que le répertoire de logs est créé au bon emplacement.
     """
-    parent_dir = tmp_path.parent.parent  # Adjusted to match LoggerManager behavior
+    parent_dir = tmp_path.parent.parent
 
     # Mock du __file__ pour contrôler l'emplacement des logs
     fake_file = tmp_path / "fake_module.py"
