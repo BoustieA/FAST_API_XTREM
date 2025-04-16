@@ -54,7 +54,7 @@ def check_pswd_security_level(mdp):
 
         if not security_minus:
             if ord(i) < 123 and ord(i) > 96:
-                security += 1 
+                security += 1
                 security_minus = True
 
         if not security_maj:
@@ -64,8 +64,8 @@ def check_pswd_security_level(mdp):
 
         if not security_spec:
             if ord(i) <= 47 or ord(i) >= 58 and ord(i) <= 64\
-            or ord(i) >= 91 and ord(i) <= 96\
-            or ord(i)   >= 123:
+                or ord(i) >= 91 and ord(i) <= 96\
+                or ord(i) >= 123:
                 security += 1
                 security_spec = True
         if security == 4:
