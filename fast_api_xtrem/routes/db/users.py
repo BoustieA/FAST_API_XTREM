@@ -7,8 +7,12 @@ from pydantic import BaseModel, constr, EmailStr
 from sqlalchemy.orm import Session
 
 from fast_api_xtrem.db.models.user import User
+from fast_api_xtrem.db.db_manager import DBManager
 
 router_users = APIRouter()
+
+db_get = DBManager("sqlite:///database/app_data.db")
+db_get.connect()
 
 
 # Fonctions utilitaires
@@ -52,22 +56,25 @@ class UserUpdate(BaseModel):
 
 # Routes
 @router_users.post("/login")
-async def login(data: UserLogin, db: Session = Depends(lambda: ...)):
+async def login(data: UserLogin, db: Session = Depends(db_get.get_db)):
     """Route pour l'authentification"""
     user = get_user_by_name(db, data.nom)
 
     if not user:
+        db_get.disconnect()
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Erreur : utilisateur non trouvé",
         )
 
     if user.pswd == hash_password(data.pswd):
+        db_get.disconnect()
         return create_response(
             message="Succès : utilisateur authentifié",
             status_code=status.HTTP_200_OK,
         )
 
+    db_get.disconnect()
     raise HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Erreur : utilisateur ou mot de passe incorrect",
@@ -87,10 +94,16 @@ async def logout():
     #  server-side.
 
 
+<<<<<<< HEAD
 @router_users.post("/add_user", status_code=status.HTTP_201_CREATED)
 async def add_user(data: UserCreate, db: Session = Depends(lambda: ...)):
+=======
+@router_users.post("/users", status_code=status.HTTP_201_CREATED)
+async def add_user(data: UserCreate, db: Session = Depends(db_get.get_db)):
+>>>>>>> f9906849835041f01522d19a1215a03e6cb5922f
     """Route pour l'ajout d'un utilisateur dans la bdd"""
     if get_user_by_name(db, data.nom):
+        db_get.disconnect()
         raise HTTPException(
             # Use 409 Conflict for duplicate resources
             status_code=status.HTTP_409_CONFLICT,
@@ -103,6 +116,7 @@ async def add_user(data: UserCreate, db: Session = Depends(lambda: ...)):
         pswd=hash_password(data.pswd))
     db.add(db_user)
     db.commit()
+    db_get.disconnect()
     return create_response(
         message="Succès : nouvel utilisateur enregistré",
         status_code=status.HTTP_201_CREATED,
@@ -111,17 +125,19 @@ async def add_user(data: UserCreate, db: Session = Depends(lambda: ...)):
 
 
 @router_users.get("/users")  # Changed endpoint
-async def get_all_users(db: Session = Depends(lambda: ...)):
+async def get_all_users(db: Session = Depends(db_get.get_db)):
     """Route pour récupérer tous les utilisateurs de la bdd"""
     users = db.query(User).all()
 
     if not users:
+        db_get.disconnect()
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Erreur : aucun utilisateur trouvé",
         )
 
     user_list = [{"nom": user.nom, "email": user.email} for user in users]
+    db_get.disconnect()
     return create_response("Succès", status.HTTP_200_OK, user_list)
 
 
@@ -129,16 +145,18 @@ async def get_all_users(db: Session = Depends(lambda: ...)):
 async def update_user(
         nom: str,
         data: UserUpdate,
-        db: Session = Depends(lambda: ...)):
+        db: Session = Depends(db_get.get_db)):
     """Route pour mettre à jour les données d'un utilisateur"""
     user = get_user_by_name(db, nom)
     if not user:
+        db_get.disconnect()
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Erreur : aucun utilisateur trouvé",
         )
     # check if the username in the path matches the username in the body
     if nom != data.nom:
+        db_get.disconnect()
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Erreur : le nom d'utilisateur dans le chemin ne "
@@ -147,16 +165,18 @@ async def update_user(
     user.email = data.email
     user.pswd = hash_password(data.pswd)  # Hash the password.
     db.commit()
+    db_get.disconnect()
     return create_response("Succès : mise à jour réussie",
                            status.HTTP_200_OK)
 
 
 @router_users.delete("/users/{nom}")
-async def delete_user(nom: str, db: Session = Depends(lambda: ...)):
+async def delete_user(nom: str, db: Session = Depends(db_get.get_db)):
     """Route pour supprimer un utilisateur de la bdd"""
     user = get_user_by_name(db, nom)
 
     if not user:
+        db_get.disconnect()
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Erreur : aucun utilisateur trouvé",
@@ -164,5 +184,6 @@ async def delete_user(nom: str, db: Session = Depends(lambda: ...)):
 
     db.delete(user)
     db.commit()
+    db_get.disconnect()
     return create_response("Succès : utilisateur supprimé",
                            status.HTTP_200_OK)
