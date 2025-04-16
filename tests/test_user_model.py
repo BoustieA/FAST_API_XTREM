@@ -9,7 +9,8 @@ from fast_api_xtrem.db.base import Base
 def session():
     # Crée une base SQLite en mémoire
     engine = create_engine(
-        "sqlite:///:memory:", connect_args={"check_same_thread": False})
+        "sqlite:///:memory:",
+        connect_args={"check_same_thread": False})
     Base.metadata.create_all(engine)
     TestingSessionLocal = sessionmaker(
         autocommit=False, autoflush=False, bind=engine)
