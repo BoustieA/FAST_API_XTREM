@@ -50,27 +50,27 @@ def check_pswd_security_level(mdp):
     security_maj = False
     security_spec = False
     for i in mdp:
-        if security_number==False:
+        if security_number == False:
             if ord(i)<58 and ord(i)>47:
                 security += 1
                 security_number = True
         
-        if security_minus==False:
+        if security_minus == False:
             if ord(i)<123 and ord(i)>96:
                 security += 1 
                 security_minus = True
         
-        if security_maj==False:
+        if security_maj == False:
             if ord(i)<91 and ord(i)>64:
-                security+=1
+                security += 1
                 security_maj = True
         
-        if security_spec==False:
-            if ord(i)<=47 or ord(i)>=58 and ord(i)<=64\
-            or ord(i)>=91 and ord(i)<=96\
-            or ord(i)>=123:
+        if security_spec == False:
+            if ord(i) <= 47 or ord(i) >= 58 and ord(i) <= 64\
+            or ord(i) >= 91 and ord(i) <= 96\
+            or ord(i) >= 123:
                 security += 1
                 security_spec = True
-        if security==4:
+        if security == 4:
             break
     return security
