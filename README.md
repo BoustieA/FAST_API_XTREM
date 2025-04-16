@@ -30,8 +30,7 @@ A modern, secure FastAPI application with Streamlit frontend.
 
 1. Start the API:
    ```bash
-   cd api
-   uvicorn main:app --reload
+   python -m fast_api_xtrem.main
    ```
 
 2. Start the Streamlit frontend:

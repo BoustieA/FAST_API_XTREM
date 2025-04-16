@@ -1,52 +1,76 @@
+"""
+Test suite for the LoggerManager class.
+
+This module contains unit tests to verify the functionality
+of the LoggerManager,
+including its singleton behavior, log directory creation,
+integration with loguru,
+and proper logging to files.
+"""
+
 from unittest.mock import patch
 
+import pytest
 from loguru import logger as loguru_logger
 
 from fast_api_xtrem.logger.logger_manager import LoggerManager
 
 
+@pytest.fixture(autouse=True)
+def reset_logger_manager_fixture():
+    """Fixture to reset LoggerManager singleton before each test."""
+    LoggerManager.reset_instance()
+    yield
+
+
 def test_singleton_pattern():
     """Vérifie que le singleton fonctionne correctement."""
-    LoggerManager._instance = None  # Réinitialiser le singleton
     manager1 = LoggerManager()
     manager2 = LoggerManager()
-    assert manager1 is manager2, "Les instances doivent être identiques"
+    assert (
+        manager1 is manager2
+    ), "Les instances doivent être identiques"
 
 
 def test_logs_directory_creation(monkeypatch, tmp_path):
-    """Teste la création du répertoire de logs."""
-    # Get the parent directory of tmp_path to match the actual behavior
-    parent_dir = tmp_path.parent
+    """
+    Teste la création du répertoire de logs.
+
+    Vérifie que le répertoire de logs est créé au bon emplacement.
+    """
+    parent_dir = tmp_path.parent.parent
 
     # Mock du __file__ pour contrôler l'emplacement des logs
     fake_file = tmp_path / "fake_module.py"
-    monkeypatch.setattr("fast_api_xtrem.logger.logger_manager.__file__",
-                        str(fake_file))
+    monkeypatch.setattr(
+        "fast_api_xtrem.logger.logger_manager.__file__", str(fake_file)
+    )
 
-    LoggerManager._instance = None
     manager = LoggerManager()
 
     assert manager.logs_dir.exists(), "Le répertoire de logs doit être créé"
-    # Check against parent_dir instead of tmp_path
-    assert manager.logs_dir == parent_dir / "logs", "Chemin des logs incorrect"
+    assert (
+        manager.logs_dir == parent_dir / "logs"
+    ), "Chemin des logs incorrect"
 
 
 def test_info_method_calls_loguru(mocker):
     """Vérifie que LoggerManager.info() appelle loguru.info()."""
-    mock_info = mocker.patch.object(loguru_logger, 'info')
-    LoggerManager._instance = None
+    # Utilise mocker.spy pour espionner loguru_logger.info
+    spy_info = mocker.spy(loguru_logger, "info")
     manager = LoggerManager()
 
     test_msg = "Message info de test"
     manager.info(test_msg)
 
-    mock_info.assert_called_once_with(test_msg)
+    # Vérifie que loguru_logger.info a été appelé avec le bon message
+    # Ignorer les appels internes en filtrant sur le dernier appel
+    assert spy_info.call_args_list[-1] == mocker.call(test_msg)
 
 
 def test_error_method_calls_loguru(mocker):
     """Vérifie que LoggerManager.error() appelle loguru.error()."""
-    mock_error = mocker.patch.object(loguru_logger, 'error')
-    LoggerManager._instance = None
+    mock_error = mocker.patch.object(loguru_logger, "error")
     manager = LoggerManager()
 
     test_msg = "Message d'erreur de test"
@@ -55,9 +79,41 @@ def test_error_method_calls_loguru(mocker):
     mock_error.assert_called_once_with(test_msg)
 
 
+def test_success_method_calls_loguru(mocker):
+    """Vérifie que LoggerManager.success() appelle loguru.success()."""
+    mock_success = mocker.patch.object(loguru_logger, "success")
+    manager = LoggerManager()
+
+    test_msg = "Message de succès de test"
+    manager.success(test_msg)
+
+    mock_success.assert_called_once_with(test_msg)
+
+
+def test_debug_method_calls_loguru(mocker):
+    """Vérifie que LoggerManager.debug() appelle loguru.debug()."""
+    mock_debug = mocker.patch.object(loguru_logger, "debug")
+    manager = LoggerManager()
+
+    test_msg = "Message de débogage de test"
+    manager.debug(test_msg)
+
+    mock_debug.assert_called_once_with(test_msg)
+
+
+def test_warning_method_calls_loguru(mocker):
+    """Vérifie que LoggerManager.warning() appelle loguru.warning()."""
+    mock_warning = mocker.patch.object(loguru_logger, "warning")
+    manager = LoggerManager()
+
+    test_msg = "Message d'avertissement de test"
+    manager.warning(test_msg)
+
+    mock_warning.assert_called_once_with(test_msg)
+
+
 def test_repr_method():
     """Teste la représentation textuelle de l'instance."""
-    LoggerManager._instance = None
     manager = LoggerManager()
 
     expected = f"<LoggerManager logs_dir={manager.logs_dir}>"
@@ -66,24 +122,26 @@ def test_repr_method():
 
 def test_catch_decorator_propagates_to_loguru():
     """Vérifie que le décorateur catch utilise bien loguru."""
-    LoggerManager._instance = None
     manager = LoggerManager()
 
-    with patch.object(loguru_logger, 'catch') as mock_catch:
+    with patch.object(loguru_logger, "catch") as mock_catch:
         decorator = manager.catch(ValueError)
         mock_catch.assert_called_once_with(ValueError)
         assert decorator == mock_catch.return_value
 
 
 def test_log_file_creation_and_content(monkeypatch, tmp_path):
-    """Test d'intégration vérifiant l'écriture dans le fichier de log."""
+    """
+    Test d'intégration vérifiant l'écriture dans le fichier de log.
+
+    Vérifie que les messages sont correctement écrits dans le fichier de log.
+    """
     # Create a fake module file for testing
     fake_file = tmp_path / "fake_module.py"
-    monkeypatch.setattr("fast_api_xtrem.logger.logger_manager.__file__",
-                        str(fake_file))
+    monkeypatch.setattr(
+        "fast_api_xtrem.logger.logger_manager.__file__", str(fake_file)
+    )
 
-    # Reset LoggerManager instance and initialize it
-    LoggerManager._instance = None
     manager = LoggerManager()
 
     # Define a test message
@@ -94,9 +152,20 @@ def test_log_file_creation_and_content(monkeypatch, tmp_path):
     log_file = manager.logs_dir / "app.log"
     assert log_file.exists(), "Le fichier de log doit exister"
 
-    # Read the log file content with proper encoding
-    log_content = log_file.read_text(encoding="utf-8")
+    # Initialize log_content to an empty string as a fallback
+    log_content = ""
+    try:
+        log_content = log_file.read_text(encoding="utf-8")
+    except FileNotFoundError:
+        pytest.fail("Log file was not found.")
+    except PermissionError:
+        pytest.fail("Insufficient permissions to read the log file.")
+    except IOError as e:
+        pytest.fail(f"An I/O error occurred while reading the log file: {e}")
+    except UnicodeDecodeError as e:
+        pytest.fail(f"Failed to read log file with UTF-8 encoding: {e}")
 
     # Assert that the test message is part of the log content
-    assert test_msg in log_content, \
-        f"Le message '{test_msg}' doit être dans le fichier de log"
+    assert (
+        test_msg in log_content
+    ), f"Le message '{test_msg}' doit être dans le fichier de log"

@@ -1,67 +1,125 @@
+"""
+Module de gestion des logs pour l'application Fast API Xtrem.
+
+Ce module fournit une implémentation de gestionnaire de logs utilisant loguru
+avec un pattern singleton pour assurer une instance unique dans l'application.
+Il offre des fonctionnalités pour enregistrer des messages d'information,
+d'erreur et de succès, ainsi qu'un décorateur pour capturer les exceptions.
+"""
+
+import os
+import sys
 from pathlib import Path
 
-from loguru import logger as loguru_logger
+from loguru import logger
 
 
 class LoggerManager:
-    _instance = None
+    """
+    Gestionnaire de logs utilisant loguru avec pattern singleton.
+    """
 
-    def __new__(cls):
-        """Implementation of the Singleton pattern"""
+    _instance = None
+    _logs_dir = None
+
+    def __new__(cls) -> "LoggerManager":
         if cls._instance is None:
-            cls._instance = super().__new__(cls)
-            cls._instance.__initialized = False
+            instance = super(LoggerManager, cls).__new__(cls)
+            cls._instance = instance
+            instance._initialize()
         return cls._instance
 
-    def __init__(self):
-        if self.__initialized:
-            return
-        self.__initialized = True
+    @classmethod
+    def reset_instance(cls):
+        """Reset the singleton instance for testing purposes."""
+        cls._instance = None
 
-        self.logs_dir = Path(__file__).parent.parent / "logs"
-        self._logger = loguru_logger  # Store the logger in a private attribute
-        self._configure()
+    def _initialize(self) -> None:
+        """
+        Initialise le gestionnaire de logs avec le chemin des logs
+        et configure loguru.
+        """
+        try:
+            # Détermine le chemin du répertoire de logs relatif au module
+            module_path = Path(os.path.dirname(os.path.abspath(__file__)))
+            project_root = module_path.parent.parent
+            self._logs_dir = project_root / "logs"
 
-    def _configure(self):
-        """Internal logger configuration"""
-        self.logs_dir.mkdir(parents=True, exist_ok=True)
-        # Confirm directory creation
-        print(
-            f"Log directory created at: {self.logs_dir}")
+            # Création du répertoire de logs s'il n'existe pas
+            if not self._logs_dir.exists():
+                self._logs_dir.mkdir(parents=True)
+                logger.info(f"Log directory created at: {self._logs_dir}")
 
-        self._logger.add(
-            self.logs_dir / "app.log",
-            rotation="10 MB",
-            level="INFO",
-            enqueue=True,
-            backtrace=True,
-            encoding="utf-8",
-        )
-        print(
-            "Logger configured successfully.")  # Confirm logger configuration
+            # Configuration de loguru
+            log_file_path = self._logs_dir / "app.log"
+
+            # Remove default handler and add our custom handlers
+            logger.remove()
+
+            # Add a handler for stdout (console)
+            log_level = os.getenv("LOG_LEVEL", "INFO")
+            logger.add(sys.stderr, level=log_level)
+
+            # Add a handler for the log file
+            logger.add(
+                str(log_file_path),
+                rotation="10 MB",
+                retention="1 week",
+                compression="zip",
+                level=log_level,
+                encoding="utf-8",
+            )
+
+            logger.info("Logger configured successfully.")
+        except Exception as e:
+            logger.error(f"Failed to initialize LoggerManager: {e}")
+            raise
 
     @property
-    def logger(self):
-        return self._logger  # Return the private logger attribute
+    def logs_dir(self) -> Path:
+        """Retourne le chemin du répertoire de logs."""
+        return self._logs_dir
 
-    def info(self, message: str):
-        self.logger.info(message)
+    @staticmethod
+    def info(message: str) -> None:
+        """Enregistre un message d'information."""
+        logger.info(message)
 
-    def error(self, message: str):
-        self.logger.error(message)
+    @staticmethod
+    def error(message: str) -> None:
+        """Enregistre un message d'erreur."""
+        logger.error(message)
 
-    def warning(self, message: str):
-        self.logger.warning(message)
+    @staticmethod
+    def success(message: str) -> None:
+        """Enregistre un message de succès."""
+        logger.success(message)
 
-    def debug(self, message: str):
-        self.logger.debug(message)
+    @staticmethod
+    def debug(message: str) -> None:
+        """Enregistre un message de débogage."""
+        logger.debug(message)
 
-    def success(self, message: str):
-        self.logger.success(message)
+    @staticmethod
+    def warning(message: str) -> None:
+        """Enregistre un message d'avertissement."""
+        logger.warning(message)
 
-    def catch(self, exception=Exception):
-        """Exception handling decorator"""
-        return self.logger.catch(exception)
+    @staticmethod
+    def catch(*args, **kwargs) -> callable:
+        """
+        Décorateur pour attraper et logger les exceptions.
 
-    def __repr__(self):
-        return f"<LoggerManager logs_dir={self.logs_dir}>"
+        Returns:
+            callable: Le décorateur catch de loguru
+        """
+        return logger.catch(*args, **kwargs)
+
+    def __repr__(self) -> str:
+        """
+        Représentation textuelle de l'instance.
+
+        Returns:
+            str: Représentation de l'instance
+        """
+        return f"<LoggerManager logs_dir={self._logs_dir}>"

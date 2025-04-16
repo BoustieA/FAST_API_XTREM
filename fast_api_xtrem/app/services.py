@@ -1,6 +1,15 @@
 # app/services.py
-from typing import Optional
 
+"""
+Module contenant les services de l'application FastAPI XTREM.
+
+Ce module définit la classe ApplicationServices, qui centralise
+l'accès aux différents services de l'application, gère leur cycle
+de vie, et fournit des méthodes pour initialiser et nettoyer
+les services.
+"""
+
+from typing import Optional
 from fast_api_xtrem.app.config import AppConfig
 from fast_api_xtrem.db.db_manager import DBManager
 from fast_api_xtrem.logger.logger_manager import LoggerManager
@@ -15,10 +24,10 @@ class ApplicationServices:
 
     def __init__(self, config: AppConfig):
         """
-        Initialise les services de l'application
+        Initialise les services de l'application.
 
         Args:
-            config: Configuration de l'application
+            config: Configuration de l'application.
         """
         self.config = config
         self.logger: Optional[LoggerManager] = None
@@ -26,7 +35,7 @@ class ApplicationServices:
         self._initialized = False
 
     def initialize(self) -> None:
-        """Initialise et démarre tous les services"""
+        """Initialise et démarre tous les services."""
         if self._initialized:
             self.logger.warning("Services déjà initialisés")
             return
@@ -48,7 +57,7 @@ class ApplicationServices:
         self.logger.info("Tous les services ont été initialisés")
 
     def cleanup(self) -> None:
-        """Nettoie et ferme tous les services"""
+        """Nettoie et ferme tous les services."""
         if not self._initialized:
             return
 
@@ -57,15 +66,3 @@ class ApplicationServices:
 
         if self.logger:
             self.logger.info("Tous les services ont été arrêtés")
-
-        self._initialized = False
-
-    @property
-    def is_initialized(self) -> bool:
-        """
-        Vérifie si les services sont initialisés
-
-        Returns:
-            bool: True si les services sont initialisés, False sinon
-        """
-        return self._initialized
