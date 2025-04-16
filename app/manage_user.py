@@ -24,9 +24,7 @@ def user_exist(nom):
 
 
 def create_user(nom, pswd, mail):
-    json = {"nom": nom,
-          "email": mail,
-          "pswd": pswd}
+    json = {"nom": nom, "email": mail, "pswd": pswd}
     requests.post(API_adress + "/add_user", json=json)
 
 
@@ -36,10 +34,7 @@ def email_exist(mail):
 
 def update_pswd(pswd, mail):
     nom = requests.post(API_adress + "/get_name_from_mail", json=json)
-
-    json={"nom": nom,
-          "mail": mail,
-          "pswd": pswd}
+    json = {"nom": nom, "mail": mail, "pswd": pswd}
     requests.post(API_adress + "/update-user", json)
     
 

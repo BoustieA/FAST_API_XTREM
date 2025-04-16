@@ -55,7 +55,7 @@ if not st.session_state.pswd_check:
                 if email_exist(email):
                     st.session_state["email"] = email
                     # Remplace par ton vrai système
-                    st.session_state["code"] = "123456" 
+                    st.session_state["code"] = "123456"
                     st.success("Code envoyé à votre email.")
                     code_input = st.text_input("Entrez le code reçu")
                     if code_input == st.session_state["code"]:
@@ -92,7 +92,8 @@ if not st.session_state.pswd_check:
                         st.error("Nom d'utilisateur déjà utilisé.")
                     else:
                         password = st.text_input("Mot de passe",
-                                                 type="password", key="signup_password")
+                                                 type="password",
+                                                 key="signup_password")
                         if password:
                             if check_pswd_security_level(password) < 3:
                                 st.warning("Mot de passe trop faible.")
