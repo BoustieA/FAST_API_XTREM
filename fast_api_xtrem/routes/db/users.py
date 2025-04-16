@@ -33,14 +33,13 @@ async def login(data, db: Session = Depends(app.services.db_manager.get_db)):
                         hashlib.sha256(pswd.encode()).hexdigest()
                 ):
                     return JSONResponse(
-                        content=
-                        {"message":"Succès : utilisateur authentifié"},
+                        content={"message":"Succès : utilisateur authentifié"},
                         status_code=200)
 
                 return JSONResponse(
-                    content=
-                    {"message":
-                         "Erreur : utilisateur ou mot de passe incorrect"},
+                    content={"message":
+                                 "Erreur : utilisateur "
+                                 "ou mot de passe incorrect"},
                     status_code=401)
 
             return JSONResponse(content={"message":"Erreur : "
