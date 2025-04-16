@@ -12,6 +12,7 @@ fonctionnement de l'application.
 
 from dataclasses import dataclass
 
+
 @dataclass
 class AppConfig:
     """Configuration de l'application.
@@ -36,7 +37,8 @@ class AppConfig:
         """Validation de la configuration après initialisation.
 
         Raises :
-            ValueError : Si l'URL de la base de données ou le titre de l'application est manquant.
+            ValueError : Si l'URL de la base de données
+            ou le titre de l'application est manquant.
         """
         if not self.database_url:
             raise ValueError("L'URL de la base de données est requise")
