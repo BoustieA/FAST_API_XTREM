@@ -1,6 +1,6 @@
 from sqlalchemy import Column, String, Integer
-
-from fast_api_xtrem.db.base import Base
+from fast_api_xtrem.db.db_manager import Base
+from pydantic import BaseModel
 
 
 class User(Base):

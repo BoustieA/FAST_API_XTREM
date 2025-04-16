@@ -87,7 +87,7 @@ async def logout():
     #  server-side.
 
 
-@router_users.post("/users", status_code=status.HTTP_201_CREATED)
+@router_users.post("/add_user", status_code=status.HTTP_201_CREATED)
 async def add_user(data: UserCreate, db: Session = Depends(lambda: ...)):
     """Route pour l'ajout d'un utilisateur dans la bdd"""
     if get_user_by_name(db, data.nom):
