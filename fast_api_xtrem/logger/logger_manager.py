@@ -25,8 +25,9 @@ class LoggerManager:
     def _configure(self):
         """Internal logger configuration"""
         self.logs_dir.mkdir(parents=True, exist_ok=True)
+        # Confirm directory creation
         print(
-            f"Log directory created at: {self.logs_dir}")  # Confirm directory creation
+            f"Log directory created at: {self.logs_dir}")
 
         self._logger.add(
             self.logs_dir / "app.log",
