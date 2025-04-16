@@ -1,8 +1,8 @@
 import streamlit as st
 import logging
 from manage_user import check_authentity, \
-    user_exist, create_user,check_pswd_security_level, \
-        email_exist, update_pswd
+    user_exist, create_user, check_pswd_security_level, \
+    email_exist, update_pswd
 # --- Setup logging ---
 logging.basicConfig(level=logging.INFO)
 
@@ -26,10 +26,10 @@ if not st.session_state.pswd_check:
     with tab1:
         if not st.session_state.reset_password:
             st.subheader("Connexion")
-            username = st.text_input("Nom d'utilisateur", 
+            username = st.text_input("Nom d'utilisateur",
                                      key="login_username")
             if username:
-                password = st.text_input("Mot de passe", 
+                password = st.text_input("Mot de passe",
                                          type="password", key="login_password")
                 if password:
                     if user_exist(username):
@@ -54,18 +54,20 @@ if not st.session_state.pswd_check:
             if email:
                 if email_exist(email):
                     st.session_state["email"] = email
-                    st.session_state["code"] = "123456"  # Remplace par ton vrai système
+                    # Remplace par ton vrai système
+                    st.session_state["code"] = "123456" 
                     st.success("Code envoyé à votre email.")
                     code_input = st.text_input("Entrez le code reçu")
                     if code_input == st.session_state["code"]:
-                        new_password = st.text_input("Nouveau mot de passe", 
+                        new_password = st.text_input("Nouveau mot de passe",
                                                      type="password")
                         if new_password:
                             if check_pswd_security_level(new_password) < 3:
                                 st.warning("Mot de passe trop faible.")
                             else:
                                 update_pswd(new_password, email)
-                                st.success("Mot de passe mis à jour avec succès !")
+                                st.success("Mot de passe mis à\
+                                            jour avec succès !")
                                 if st.button("Retour à la connexion"):
                                     st.session_state.reset_password = False
                                     st.session_state.button_pressed = False
@@ -83,7 +85,8 @@ if not st.session_state.pswd_check:
             if email_exist(email):
                 st.error("Email déjà utilisé.")
             else:
-                username = st.text_input("Nom d'utilisateur", key="signup_username")
+                username = st.text_input("Nom d'utilisateur",
+                                         key="signup_username")
                 if username:
                     if user_exist(username):
                         st.error("Nom d'utilisateur déjà utilisé.")
