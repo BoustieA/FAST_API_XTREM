@@ -14,6 +14,10 @@ class Utilisateur(Base):
 
 
 class UtilisateurBase(BaseModel):
+    nom: Optional[str] = None
+    email: Optional[str] = None
+    pswd: Optional[str] = None
+
+class UtilisateurLogin(BaseModel):
     nom: str
-    email: str
     pswd: str

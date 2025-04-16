@@ -1,10 +1,20 @@
 from fastapi import APIRouter, Depends
 from fastapi.responses import JSONResponse
-from models.user import UtilisateurBase, Utilisateur
 from sqlalchemy.orm import Session
-from fast_api_xtrem.main import app
-import hashlib
+
+
 import os
+import sys
+
+# Remonter de 2 dossiers depuis le fichier courant
+current_dir = os.path.dirname(__file__)
+parent_dir = os.path.abspath(os.path.join(current_dir, "..", ".."))
+sys.path.append(parent_dir)
+
+from fast_api_xtrem.main import app
+from fast_api_xtrem.models.user import UtilisateurBase, Utilisateur, UtilisateurLogin
+import hashlib
+
 
 
 router_users = APIRouter()
@@ -14,7 +24,7 @@ router_users = APIRouter()
 # Routes
 ###########
 @router_users.post("/login")
-async def login(data: UtilisateurBase,
+async def login(data: UtilisateurLogin,
                 db: Session = Depends(app.services.db_manager.get_db)):
     """
     Route pour l'authentification
@@ -265,6 +275,62 @@ async def delete_user(data: UtilisateurBase,
                 "message": "Erreur : aucunes données envoyées"
                 }
             ), 400
+
+    except Exception as e:
+        return JSONResponse(content={"message": "Erreur : " + str(e)}), 500
+
+
+@router_users.post("/mail_exist")
+async def mail_exist(data: UtilisateurBase,
+                db: Session = Depends(app.services.db_manager.get_db)):
+    """
+    Route pour l'authentification
+
+    Paramètres :
+        - data: les identifiants envoyés par l'utilisateur
+        - db: la session de bdd actuelle
+
+    Return :
+        - Un message de réponse JSON confirmant ou invalidant
+          l'authentification
+    """
+    try:
+        if data:
+            mail=data.mail
+
+            utilisateur = db.query(Utilisateur).filter_by(mail=mail).first()
+
+            if utilisateur:
+                return True
+            return False
+
+    except Exception as e:
+        return JSONResponse(content={"message": "Erreur : " + str(e)}), 500
+
+
+@router_users.post("/get_name_from_mail")
+async def get_name_from_mail(data: UtilisateurBase,
+                db: Session = Depends(app.services.db_manager.get_db)):
+    """
+    Route pour l'authentification
+
+    Paramètres :
+        - data: les identifiants envoyés par l'utilisateur
+        - db: la session de bdd actuelle
+
+    Return :
+        - Un message de réponse JSON confirmant ou invalidant
+          l'authentification
+    """
+    try:
+        if data:
+            mail=data.mail
+
+            utilisateur = db.query(Utilisateur).filter_by(mail=mail).first()
+
+            if utilisateur:
+                return utilisateur.nom
+            assert False, "mail sans matching"
 
     except Exception as e:
         return JSONResponse(content={"message": "Erreur : " + str(e)}), 500

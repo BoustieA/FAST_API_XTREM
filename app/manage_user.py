@@ -1,13 +1,43 @@
-def check_authentity(nm_user,pswd):
+import requests
+
+API_adress="http://127.0.0.1:8000"
+
+def check_authentity(nom,pswd):
+    json={"nom":nom,"pswd":pswd}
+    response=requests.post(API_adress+"/login",json=json)
+    code=response.status_code
+    if code==200:
+        return True
+    else:
+        return False
+
+def user_exist(nom):
+    json={"nom":nom,"pswd":""}
+    response=requests.post(API_adress+"/login",json=json)
+    code=response.status_code
+    if code==401:
+        return True
     return False
-def user_exist(name):
-    return True
-def create_user(name,pswd,mail):
-    pass
+
+def create_user(nom,pswd,mail):
+    json={"nom":nom,
+          "email":mail,
+          "pswd":pswd}
+    requests.post(API_adress+"/add_user",json=json)
+
+
 def email_exist(mail):
-    return True
+    json={"email":mail}
+    return requests.post(API_adress+"/mail_exist",json=json)
+
 def update_pswd(pswd,mail):
-    pass
+    nom=requests.post(API_adress+"/get_name_from_mail",json=json)
+
+    json={"nom":nom,
+          "mail":mail,
+          "pswd":pswd}
+    requests.post(API_adress+"/update-user",json)
+    
 
 def check_pswd_security_level(mdp):
     security=0
