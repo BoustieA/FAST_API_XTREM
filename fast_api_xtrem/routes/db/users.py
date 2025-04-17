@@ -22,7 +22,7 @@ router_users = APIRouter()
 def get_db(request: Request):
     """
     Dépendance pour récupérer la Session SQLAlchemy
-    via le DBManager présent dans app.state.services.
+    via le DBManager présent dans fast_api.state.services.
     """
     db_manager = request.app.state.services.db_manager
     yield from db_manager.get_db()
@@ -31,7 +31,7 @@ def get_db(request: Request):
 def get_logger(request: Request):
     """
     Dépendance pour récupérer le logger
-    exposé dans app.state.logger.
+    exposé dans fast_api.state.logger.
     """
     return request.app.state.logger
 

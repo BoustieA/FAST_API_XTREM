@@ -29,7 +29,7 @@ class LoggerConfig:
     (niveau, fichier, rotation)."""
 
     log_level: str = "INFO"
-    log_file_name: str = "app.log"
+    log_file_name: str = "fast_api.log"
     log_rotation: str = "10 MB"
     log_retention: str = "1 week"
     log_compression: str = "zip"
