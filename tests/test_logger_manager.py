@@ -53,7 +53,6 @@ def test_logs_directory_creation(monkeypatch, tmp_path):
          f"obtenu {manager.logs_dir}")
 
 
-
 def test_info_method_calls_loguru(mocker):
     """
     Vérifie que LoggerManager.info() appelle loguru.info().
