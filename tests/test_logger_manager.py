@@ -27,9 +27,7 @@ def test_singleton_pattern():
     """Vérifie que le singleton fonctionne correctement."""
     manager1 = LoggerManager()
     manager2 = LoggerManager()
-    assert (
-        manager1 is manager2
-    ), "Les instances doivent être identiques"
+    assert manager1 is manager2, "Les instances doivent être identiques"
 
 
 def test_logs_directory_creation(monkeypatch, tmp_path):
@@ -49,9 +47,7 @@ def test_logs_directory_creation(monkeypatch, tmp_path):
     manager = LoggerManager()
 
     assert manager.logs_dir.exists(), "Le répertoire de logs doit être créé"
-    assert (
-        manager.logs_dir == parent_dir / "logs"
-    ), "Chemin des logs incorrect"
+    assert manager.logs_dir == parent_dir / "logs", "Chemin des logs incorrect"
 
 
 def test_info_method_calls_loguru(mocker):

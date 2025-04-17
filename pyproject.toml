@@ -1,0 +1,22 @@
+[tool.black]
+line-length = 79
+target-version = ["py311"]
+include = '\.pyi?$'
+exclude = '''
+/(
+    \.git
+  | \.venv
+  | __pycache__
+  | build
+  | dist
+)/
+'''
+
+[tool.isort]
+profile = "black"
+line_length = 79
+src_paths = ["fast_api_xtrem"]
+skip = ["__init__.py", "__pycache__"]
+
+[tool.flake8]
+max-line-length = 79
