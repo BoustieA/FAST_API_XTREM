@@ -330,6 +330,7 @@ async def login_token(form_data: OAuth2PasswordRequestForm = Depends(),
     user = get_user_by_name(db, form_data.username)
 
     if not user:
+        logger.error("Utilisateur non trouvé")
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Utilisateur non trouvé",
@@ -338,6 +339,7 @@ async def login_token(form_data: OAuth2PasswordRequestForm = Depends(),
     hashed_input_pwd = hash_password(form_data.password)
 
     if hashed_input_pwd != user.pswd:
+        logger.error("Mot de passe incorrect")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Mot de passe incorrect",
@@ -349,11 +351,12 @@ async def login_token(form_data: OAuth2PasswordRequestForm = Depends(),
     return {"access_token": access_token, "token_type": "bearer"}
 
 
-def decode_token(token: str):
+def decode_token(token: str, logger=Depends(get_logger)):
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         return payload
     except InvalidTokenError:
+        logger.error("token non valide")
         raise HTTPException(status_code=401, detail="Token invalide")
 
 
@@ -368,5 +371,5 @@ async def get_connection_status(token: str = Depends(oauth2_scheme)):
     try :
         decode_token(token)
         return True
-    except Exception as e:        
+    except Exception as e:     
         return False
