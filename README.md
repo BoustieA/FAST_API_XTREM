@@ -25,6 +25,24 @@ A modern, secure FastAPI application with Streamlit frontend.
    ```bash
    pip install -r requirements.txt
    ```
+## Linter
+
+```bash
+# Installation des outils
+pip install black isort flake8 pylint
+
+# Formatage avec Black
+black fast_api_xtrem
+
+# Organisation des imports
+isort fast_api_xtrem
+
+# Vérification Flake8
+flake8 fast_api_xtrem
+
+# Vérification Pylint (optionnel mais utile)
+pylint fast_api_xtrem
+```
 
 ## Running the Application
 
