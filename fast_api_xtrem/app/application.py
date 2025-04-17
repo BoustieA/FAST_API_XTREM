@@ -10,7 +10,6 @@ from fastapi import FastAPI
 
 from fast_api_xtrem.app.config import AppConfig
 from fast_api_xtrem.app.services import ApplicationServices
-from fast_api_xtrem.app.state import AppState
 from fast_api_xtrem.routes.app.favicon import router_favicon
 from fast_api_xtrem.routes.app.root import router_root
 from fast_api_xtrem.routes.db.users import router_users
@@ -29,7 +28,6 @@ class Application:
         """
         self.config: AppConfig = config
         self.services: Optional[ApplicationServices] = None
-        self.app_state: AppState = AppState()
         self.app: FastAPI = self._create_app()
 
     def _create_app(self) -> FastAPI:
@@ -78,14 +76,14 @@ class Application:
 
             return uvicorn.run(
                 app_import_string,
-                host=self.config.host,
-                port=self.config.port,
+                host=self.config.network_config.host,
+                port=self.config.network_config.port,
                 reload=True,
             )
 
         return uvicorn.run(
             self.app,
-            host=self.config.host,
-            port=self.config.port,
+            host=self.config.network_config.host,
+            port=self.config.network_config.port,
             reload=False,
         )

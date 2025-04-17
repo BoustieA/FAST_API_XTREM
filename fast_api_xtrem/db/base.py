@@ -19,6 +19,6 @@ def get_base():
     Retourne l'instance unique de la base déclarative SQLAlchemy.
 
     Returns:
-        Base: Classe de base pour les modèles SQLAlchemy.
+        Base : Classe de base pour les modèles SQLAlchemy.
     """
     return Base

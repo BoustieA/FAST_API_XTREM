@@ -15,10 +15,10 @@ def get_logger(request: Request):
     Récupère le logger depuis l'état de l'application.
 
     Args:
-        request (Request): Requête HTTP entrante.
+        request (Request) : Requête HTTP entrante.
 
     Returns:
-        Logger: L'instance du logger.
+        Logger : L'instance du logger.
     """
     return request.app.state.logger
 
