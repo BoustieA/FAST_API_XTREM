@@ -55,7 +55,9 @@ def test_logs_directory_creation(monkeypatch, tmp_path):
 
 
 def test_info_method_calls_loguru(mocker):
-    """Vérifie que LoggerManager.info() appelle loguru.info()."""
+    """
+    Vérifie que LoggerManager.info() appelle loguru.info().
+    """
     # Utilise mocker.spy pour espionner loguru_logger.info
     spy_info = mocker.spy(loguru_logger, "info")
     manager = LoggerManager(logger_config)

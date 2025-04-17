@@ -44,7 +44,8 @@ def test_create_user(db_session):
     db_session.add(user)
     db_session.commit()
 
-    result = db_session.query(User).filter_by(email="alice@example.com").first()
+    result = (db_session.query(User).filter_by(email="alice@example.com")
+              .first())
     assert result is not None
     assert result.nom == "Alice"
     assert result.email == "alice@example.com"
