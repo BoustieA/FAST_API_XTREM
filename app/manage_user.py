@@ -17,11 +17,8 @@ def check_email_valid(mail):
 def check_authentity(nom, pswd):
     json = {"nom": nom, "pswd": pswd}
     response = requests.post(URL_API + "/login", json=json)
-    code = response.status_code
-    if code == 200:
-        return True
-    else:
-        return False
+    
+    return response.token
 
 
 def user_exist(nom):
@@ -57,6 +54,7 @@ def update_pswd(pswd, mail):
     response = requests.get(URL_API + "/users")
     data = response.json()
     users = data.get("data", [])
+    nom = ""
     for user in users:
         if user.get("email") == mail:
             nom = user.get("nom")
@@ -95,3 +93,13 @@ def check_pswd_security_level(mdp):
         if security == 4:
             break
     return security
+
+def get_user_data():
+    response = requests.get(URL_API + "/token_data")
+    data = response.json()
+
+    if data:
+        user = data.get("data")
+        return user
+    
+    return None

@@ -1,12 +1,11 @@
-from sqlalchemy import Column, String, Integer
-from pydantic import BaseModel, constr, EmailStr
-from fast_api_xtrem.db.db_manager import Base
 """
 Modèle de la table 'users' pour la base de données.
 
 Ce module définit la structure de la table utilisateur,
 incluant l'identifiant, le nom, l'email et le mot de passe.
 """
+
+from pydantic import BaseModel, constr, EmailStr
 
 from sqlalchemy import Column, Integer, String
 

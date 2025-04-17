@@ -11,10 +11,9 @@ from typing import Any, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel, EmailStr, constr
 from sqlalchemy.orm import Session
 
-from fast_api_xtrem.db.models.user import User
+from fast_api_xtrem.db.models.user import User, UserCreate, UserLogin, UserUpdate
 
 router_users = APIRouter()
 
@@ -82,36 +81,6 @@ def get_user_by_name(db: Session, nom: str) -> Optional[User]:
         Optional[User]: L'utilisateur s'il existe, sinon None.
     """
     return db.query(User).filter_by(nom=nom).first()
-
-
-class UserLogin(BaseModel):
-    """
-    Modèle de données pour la connexion utilisateur.
-    """
-
-    nom: constr(min_length=1, max_length=50)
-    pswd: constr(min_length=8)
-
-
-class UserCreate(BaseModel):
-    """
-    Modèle de données pour la création d'un utilisateur.
-    """
-
-    nom: constr(min_length=1, max_length=50)
-    email: EmailStr
-    pswd: constr(min_length=8)
-
-
-class UserUpdate(BaseModel):
-    """
-    Modèle pour la mise à jour d'un utilisateur.
-    Autorise la modification du nom, de l'email et du mot de passe.
-    """
-
-    nom: constr(min_length=1, max_length=50)
-    email: EmailStr
-    pswd: constr(min_length=8)
 
 
 @router_users.post("/login", response_model=dict)
