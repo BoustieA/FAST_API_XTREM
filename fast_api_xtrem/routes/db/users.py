@@ -12,7 +12,6 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from datetime import datetime, timedelta
 import jwt
 from jwt.exceptions import InvalidTokenError
-from typing import Optional
 
 
 # JWT config
@@ -228,7 +227,8 @@ async def login_token(form_data: OAuth2PasswordRequestForm = Depends(),
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    access_token = create_access_token(data={"nom": user.nom,"email":user.email})
+    access_token = create_access_token(data={"nom": user.nom,
+                                             "email": user.email})
     return {"access_token": access_token, "token_type": "bearer"}
 
 
@@ -239,10 +239,11 @@ def decode_token(token: str):
     except InvalidTokenError:
         raise HTTPException(status_code=401, detail="Token invalide")
 
+
 @router_users.get("/user_info")
 async def get_me(token: str = Depends(oauth2_scheme)):
     payload = decode_token(token)
-    return {"nom":payload["nom"], "email":payload["email"]}
+    return {"nom": payload["nom"], "email": payload["email"]}
 
 
 @router_users.get("/is_connected")
@@ -250,5 +251,6 @@ async def get_connection_status(token: str = Depends(oauth2_scheme)):
     try :
         decode_token(token)
         return True
-    except:
+    except Exception as e:
+        
         return False
