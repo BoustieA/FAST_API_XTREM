@@ -1,8 +1,11 @@
 """
-Gestionnaire de base de données pour FastAPI XTREM.
+Module de gestion de la base de données pour l'application FastAPI Xtrem.
 
-Ce module fournit une classe DBManager pour gérer la connexion,
-la création de tables et les opérations CRUD sur la base de données.
+Ce module contient la classe DBManager, responsable de la connexion à la base
+de données, de la création des tables, de la gestion des sessions SQLAlchemy
+et de la vérification des structures existantes.
+
+Il définit également une exception personnalisée pour les erreurs de connexion.
 """
 
 from pathlib import Path
@@ -10,7 +13,7 @@ from pathlib import Path
 from sqlalchemy import create_engine, inspect
 from sqlalchemy.orm import sessionmaker
 
-from fast_api_xtrem.app.config import AppConfig
+from fast_api_xtrem.app.config import DatabaseConfig, LoggerConfig
 from fast_api_xtrem.db.base import Base
 from fast_api_xtrem.logger.logger_manager import LoggerManager
 
@@ -31,12 +34,14 @@ class DBManager:
     comme la vérification des tables.
     """
 
-    def __init__(self, config: AppConfig, logger=None):
+    def __init__(
+        self, config: DatabaseConfig, logger_config: LoggerConfig, logger=None
+    ):
         """
         Initialise le gestionnaire de base de données.
 
         Args:
-            config (AppConfig): Configuration de l'application contenant
+            config (AppConfig) : Configuration de l'application contenant
                                 l'URL de la base de données.
             logger: Instance du gestionnaire de logs.
         """
@@ -44,7 +49,7 @@ class DBManager:
         self.database_url = config.database_url
         self.engine = None
         self.session_local = None
-        self.logger = logger or LoggerManager()
+        self.logger = logger or LoggerManager(logger_config)
         self._check_db_file()
 
     @staticmethod
@@ -155,7 +160,7 @@ class DBManager:
         Vérifie les tables existantes dans la base de données.
 
         Returns:
-            list[str]: Noms des tables détectées.
+            list[str] : Noms des tables détectées.
         """
         if not self.engine:
             self.logger.error(

@@ -1,125 +1,129 @@
 """
-Module de gestion des logs pour l'application Fast API Xtrem.
+Module de gestion des logs pour l'application FastAPI XTREM.
 
-Ce module fournit une implémentation de gestionnaire de logs utilisant loguru
-avec un pattern singleton pour assurer une instance unique dans l'application.
-Il offre des fonctionnalités pour enregistrer des messages d'information,
-d'erreur et de succès, ainsi qu'un décorateur pour capturer les exceptions.
+Ce module fournit une implémentation de gestionnaire de logs utilisant Loguru
+avec un pattern singleton. Il offre des méthodes statiques pour enregistrer
+différents niveaux de logs ainsi qu'un décorateur pour capturer les exceptions.
 """
 
-import os
 import sys
 from pathlib import Path
 
 from loguru import logger
 
+from fast_api_xtrem.app.config import LoggerConfig
+
 
 class LoggerManager:
     """
-    Gestionnaire de logs utilisant loguru avec pattern singleton.
+    Gestionnaire de logs utilisant loguru (pattern singleton).
+
+    Permet l'enregistrement des messages de logs vers la console et un fichier,
+    avec rotation, compression, et gestion centralisée via AppConfig.
     """
 
     _instance = None
-    _logs_dir = None
+    _logs_dir: Path = None
 
-    def __new__(cls) -> "LoggerManager":
+    def __new__(cls, config: LoggerConfig) -> "LoggerManager":
+        """Implémente le pattern singleton."""
         if cls._instance is None:
             instance = super(LoggerManager, cls).__new__(cls)
             cls._instance = instance
-            instance._initialize()
+            instance._initialize(config)
         return cls._instance
 
     @classmethod
     def reset_instance(cls):
-        """Reset the singleton instance for testing purposes."""
+        """
+        Réinitialise l'instance singleton.
+
+        Utile pour les tests ou la réinitialisation manuelle.
+        """
         cls._instance = None
 
-    def _initialize(self) -> None:
+    def _initialize(self, config: LoggerConfig) -> None:
         """
-        Initialise le gestionnaire de logs avec le chemin des logs
-        et configure loguru.
+        Initialise le logger avec la configuration fournie.
+
+        Args:
+            config (AppConfig): Configuration contenant
+            les paramètres du logger.
         """
         try:
-            # Détermine le chemin du répertoire de logs relatif au module
-            module_path = Path(os.path.dirname(os.path.abspath(__file__)))
-            project_root = module_path.parent.parent
-            self._logs_dir = project_root / "logs"
+            # Répertoire des logs : fast_api_xtrem/logs
+            base_path = Path(__file__).resolve().parent.parent
+            self._logs_dir = base_path / "logs"
+            self._logs_dir.mkdir(parents=True, exist_ok=True)
 
-            # Création du répertoire de logs s'il n'existe pas
-            if not self._logs_dir.exists():
-                self._logs_dir.mkdir(parents=True)
-                logger.info(f"Log directory created at: {self._logs_dir}")
+            log_path = self._logs_dir / config.log_file_name
 
-            # Configuration de loguru
-            log_file_path = self._logs_dir / "app.log"
-
-            # Remove default handler and add our custom handlers
+            # Suppression des handlers précédents
             logger.remove()
 
-            # Add a handler for stdout (console)
-            log_level = os.getenv("LOG_LEVEL", "INFO")
-            logger.add(sys.stderr, level=log_level)
+            # Log vers la console (coloré)
+            logger.add(sys.stderr, level=config.log_level)
 
-            # Add a handler for the log file
+            # Log vers le fichier (non coloré)
             logger.add(
-                str(log_file_path),
-                rotation="10 MB",
-                retention="1 week",
-                compression="zip",
-                level=log_level,
-                encoding="utf-8",
+                str(log_path),
+                rotation=config.log_rotation,
+                retention=config.log_retention,
+                compression=config.log_compression,
+                level=config.log_level,
+                encoding=config.log_encoding,
+                colorize=False,
             )
 
-            logger.info("Logger configured successfully.")
+            logger.info("Logger initialized with config from AppConfig.")
         except Exception as e:
-            logger.error(f"Failed to initialize LoggerManager: {e}")
+            logger.error(f"Logger initialization failed: {e}")
             raise
 
     @property
     def logs_dir(self) -> Path:
-        """Retourne le chemin du répertoire de logs."""
+        """
+        Retourne le chemin du répertoire des logs.
+
+        Returns:
+            Path : Répertoire où sont stockés les fichiers de log.
+        """
         return self._logs_dir
 
     @staticmethod
     def info(message: str) -> None:
-        """Enregistre un message d'information."""
+        """Log un message d'information."""
         logger.info(message)
 
     @staticmethod
     def error(message: str) -> None:
-        """Enregistre un message d'erreur."""
+        """Log un message d'erreur."""
         logger.error(message)
 
     @staticmethod
     def success(message: str) -> None:
-        """Enregistre un message de succès."""
+        """Log un message de succès."""
         logger.success(message)
 
     @staticmethod
     def debug(message: str) -> None:
-        """Enregistre un message de débogage."""
+        """Log un message de debug."""
         logger.debug(message)
 
     @staticmethod
     def warning(message: str) -> None:
-        """Enregistre un message d'avertissement."""
+        """Log un message d'avertissement."""
         logger.warning(message)
 
     @staticmethod
     def catch(*args, **kwargs) -> callable:
         """
-        Décorateur pour attraper et logger les exceptions.
+        Retourne un décorateur pour capturer les exceptions avec Loguru.
 
         Returns:
-            callable: Le décorateur catch de loguru
+            callable: Décorateur de fonction.
         """
         return logger.catch(*args, **kwargs)
 
     def __repr__(self) -> str:
-        """
-        Représentation textuelle de l'instance.
-
-        Returns:
-            str: Représentation de l'instance
-        """
         return f"<LoggerManager logs_dir={self._logs_dir}>"
