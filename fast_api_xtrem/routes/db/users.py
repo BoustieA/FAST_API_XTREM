@@ -3,10 +3,9 @@ from typing import Any, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel, constr, EmailStr
 from sqlalchemy.orm import Session
 
-from fast_api_xtrem.db.models.user import User
+from fast_api_xtrem.db.models.user import User, UserLogin, UserCreate, UserUpdate
 from fast_api_xtrem.db.db_manager import DBManager
 
 router_users = APIRouter()
@@ -34,24 +33,6 @@ def hash_password(password: str) -> str:
 def get_user_by_name(db: Session, nom: str) -> Optional[User]:
     """Récupère un utilisateur par son nom"""
     return db.query(User).filter_by(nom=nom).first()
-
-
-# Pydantic Models for request validation
-class UserLogin(BaseModel):
-    nom: constr(min_length=1, max_length=50)
-    pswd: constr(min_length=8)  # Consider a minimum password length
-
-
-class UserCreate(BaseModel):
-    nom: constr(min_length=1, max_length=50)
-    email: EmailStr
-    pswd: constr(min_length=8)
-
-
-class UserUpdate(BaseModel):
-    nom: constr(min_length=1, max_length=50)
-    email: EmailStr
-    pswd: constr(min_length=8)  # added pswd
 
 
 # Routes
