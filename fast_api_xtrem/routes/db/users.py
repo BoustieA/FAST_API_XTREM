@@ -124,7 +124,7 @@ class UserUpdate(BaseModel):
 
 @router_users.post("/login", response_model=dict)
 async def login(
-    data: UserLogin, db: Session = Depends(get_db), logger=Depends(get_logger)
+    data: UserLogin, db: Session = Depends(db_get.get_db), logger=Depends(get_logger)
 ) -> JSONResponse:
     """
     Authentifie un utilisateur.
@@ -179,7 +179,7 @@ async def logout(logger=Depends(get_logger)) -> JSONResponse:
     "/users", status_code=status.HTTP_201_CREATED, response_model=dict
 )
 async def add_user(
-    data: UserCreate, db: Session = Depends(get_db), logger=Depends(get_logger)
+    data: UserCreate, db: Session = Depends(db_get.get_db), logger=Depends(get_logger)
 ) -> JSONResponse:
     """
     Crée un nouvel utilisateur.
@@ -213,7 +213,7 @@ async def add_user(
 
 @router_users.get("/users", response_model=dict)
 async def get_all_users(
-    db: Session = Depends(get_db), logger=Depends(get_logger)
+    db: Session = Depends(db_get.get_db), logger=Depends(get_logger)
 ) -> JSONResponse:
     """
     Récupère la liste de tous les utilisateurs.
@@ -245,7 +245,7 @@ async def get_all_users(
 async def update_user(
     nom: str,
     data: UserUpdate,
-    db: Session = Depends(get_db),
+    db: Session = Depends(db_get.get_db),
     logger=Depends(get_logger),
 ) -> JSONResponse:
     """
@@ -287,7 +287,7 @@ async def update_user(
 
 @router_users.delete("/users/{nom}", response_model=dict)
 async def delete_user(
-    nom: str, db: Session = Depends(get_db), logger=Depends(get_logger)
+    nom: str, db: Session = Depends(db_get.get_db), logger=Depends(get_logger)
 ) -> JSONResponse:
     """
     Supprime un utilisateur existant.
@@ -323,7 +323,8 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
 
 @router_users.post("/token")
 async def login_token(form_data: OAuth2PasswordRequestForm = Depends(),
-                      db: Session = Depends(db_get.get_db)):
+                      db: Session = Depends(db_get.get_db),
+                      logger=Depends(get_logger)):
     """Route d'authentification qui génère un token JWT"""
 
     # form_data contient .username et .password
@@ -368,8 +369,8 @@ async def get_me(token: str = Depends(oauth2_scheme)):
 
 @router_users.get("/is_connected")
 async def get_connection_status(token: str = Depends(oauth2_scheme)):
-    try :
+    try:
         decode_token(token)
         return True
-    except Exception as e:     
+    except Exception:
         return False
