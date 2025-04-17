@@ -8,10 +8,24 @@ from sqlalchemy.orm import Session
 
 from fast_api_xtrem.db.models.user import User
 from fast_api_xtrem.db.db_manager import DBManager
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from datetime import datetime, timedelta
+import jwt
+from jwt.exceptions import InvalidTokenError
+from typing import Optional
+
+
+# JWT config
+SECRET_KEY = "votre-cle-secrete"
+ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES = 30
+DATABASE_URL = "sqlite:///database/app_data.db"
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 router_users = APIRouter()
 
-db_get = DBManager("sqlite:///database/app_data.db")
+db_get = DBManager(DATABASE_URL)
 db_get.connect()
 
 
@@ -182,3 +196,59 @@ async def delete_user(nom: str, db: Session = Depends(db_get.get_db)):
     db_get.disconnect()
     return create_response("Succès : utilisateur supprimé",
                            status.HTTP_200_OK)
+
+
+def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
+    to_encode = data.copy()
+    expire = datetime.utcnow() + (expires_delta or timedelta(minutes=15))
+    to_encode.update({"exp": expire})
+    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+
+
+@router_users.post("/token")
+async def login_token(form_data: OAuth2PasswordRequestForm = Depends(),
+                      db: Session = Depends(db_get.get_db)):
+    """Route d'authentification qui génère un token JWT"""
+
+    # form_data contient .username et .password
+    user = get_user_by_name(db, form_data.username)
+
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Utilisateur non trouvé",
+        )
+
+    hashed_input_pwd = hash_password(form_data.password)
+
+    if hashed_input_pwd != user.pswd:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Mot de passe incorrect",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    access_token = create_access_token(data={"nom": user.nom,"email":user.email})
+    return {"access_token": access_token, "token_type": "bearer"}
+
+
+def decode_token(token: str):
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        return payload
+    except InvalidTokenError:
+        raise HTTPException(status_code=401, detail="Token invalide")
+
+@router_users.get("/user_info")
+async def get_me(token: str = Depends(oauth2_scheme)):
+    payload = decode_token(token)
+    return {"nom":payload["nom"], "email":payload["email"]}
+
+
+@router_users.get("/is_connected")
+async def get_connection_status(token: str = Depends(oauth2_scheme)):
+    try :
+        decode_token(token)
+        return True
+    except:
+        return False
