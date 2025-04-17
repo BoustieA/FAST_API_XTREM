@@ -1,19 +1,21 @@
 import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from fast_api_xtrem.db.models.user import User
+
 from fast_api_xtrem.db.base import Base
+from fast_api_xtrem.db.models.user import User
 
 
 @pytest.fixture(scope="function")
 def session():
     # Crée une base SQLite en mémoire
     engine = create_engine(
-        "sqlite:///:memory:",
-        connect_args={"check_same_thread": False})
+        "sqlite:///:memory:", connect_args={"check_same_thread": False}
+    )
     Base.metadata.create_all(engine)
     TestingSessionLocal = sessionmaker(
-        autocommit=False, autoflush=False, bind=engine)
+        autocommit=False, autoflush=False, bind=engine
+    )
     db = TestingSessionLocal()
     try:
         yield db
