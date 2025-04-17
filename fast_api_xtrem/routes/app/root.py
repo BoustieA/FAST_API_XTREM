@@ -39,5 +39,5 @@ async def root(logger=Depends(get_logger)):
         "message": "Hello World",
         "docs": "/docs",
         "redoc": "/redoc",
-        "metrics": "/metrics"
+        "metrics": "/metrics",
     }
