@@ -14,6 +14,9 @@ import pytest
 from loguru import logger as loguru_logger
 
 from fast_api_xtrem.logger.logger_manager import LoggerManager
+from fast_api_xtrem.app.config import LoggerConfig
+
+logger_config = LoggerConfig()
 
 
 @pytest.fixture(autouse=True)
@@ -25,36 +28,37 @@ def reset_logger_manager_fixture():
 
 def test_singleton_pattern():
     """Vérifie que le singleton fonctionne correctement."""
-    manager1 = LoggerManager()
-    manager2 = LoggerManager()
+    manager1 = LoggerManager(logger_config)
+    manager2 = LoggerManager(logger_config)
     assert manager1 is manager2, "Les instances doivent être identiques"
 
 
 def test_logs_directory_creation(monkeypatch, tmp_path):
     """
     Teste la création du répertoire de logs.
-
-    Vérifie que le répertoire de logs est créé au bon emplacement.
     """
-    parent_dir = tmp_path.parent.parent
-
-    # Mock du __file__ pour contrôler l'emplacement des logs
+    # Crée un faux fichier source dans tmp_path
     fake_file = tmp_path / "fake_module.py"
     monkeypatch.setattr(
         "fast_api_xtrem.logger.logger_manager.__file__", str(fake_file)
     )
 
-    manager = LoggerManager()
+    # L'instance va créer logs_dir à partir du parent.parent de fake_file
+    expected_logs_dir = fake_file.resolve().parent.parent / "logs"
+    manager = LoggerManager(logger_config)
 
     assert manager.logs_dir.exists(), "Le répertoire de logs doit être créé"
-    assert manager.logs_dir == parent_dir / "logs", "Chemin des logs incorrect"
+    assert manager.logs_dir == expected_logs_dir, \
+        (f"Chemin des logs incorrect : attendu {expected_logs_dir}, "
+         f"obtenu {manager.logs_dir}")
+
 
 
 def test_info_method_calls_loguru(mocker):
     """Vérifie que LoggerManager.info() appelle loguru.info()."""
     # Utilise mocker.spy pour espionner loguru_logger.info
     spy_info = mocker.spy(loguru_logger, "info")
-    manager = LoggerManager()
+    manager = LoggerManager(logger_config)
 
     test_msg = "Message info de test"
     manager.info(test_msg)
@@ -67,7 +71,7 @@ def test_info_method_calls_loguru(mocker):
 def test_error_method_calls_loguru(mocker):
     """Vérifie que LoggerManager.error() appelle loguru.error()."""
     mock_error = mocker.patch.object(loguru_logger, "error")
-    manager = LoggerManager()
+    manager = LoggerManager(logger_config)
 
     test_msg = "Message d'erreur de test"
     manager.error(test_msg)
@@ -78,7 +82,7 @@ def test_error_method_calls_loguru(mocker):
 def test_success_method_calls_loguru(mocker):
     """Vérifie que LoggerManager.success() appelle loguru.success()."""
     mock_success = mocker.patch.object(loguru_logger, "success")
-    manager = LoggerManager()
+    manager = LoggerManager(logger_config)
 
     test_msg = "Message de succès de test"
     manager.success(test_msg)
@@ -89,7 +93,7 @@ def test_success_method_calls_loguru(mocker):
 def test_debug_method_calls_loguru(mocker):
     """Vérifie que LoggerManager.debug() appelle loguru.debug()."""
     mock_debug = mocker.patch.object(loguru_logger, "debug")
-    manager = LoggerManager()
+    manager = LoggerManager(logger_config)
 
     test_msg = "Message de débogage de test"
     manager.debug(test_msg)
@@ -100,7 +104,7 @@ def test_debug_method_calls_loguru(mocker):
 def test_warning_method_calls_loguru(mocker):
     """Vérifie que LoggerManager.warning() appelle loguru.warning()."""
     mock_warning = mocker.patch.object(loguru_logger, "warning")
-    manager = LoggerManager()
+    manager = LoggerManager(logger_config)
 
     test_msg = "Message d'avertissement de test"
     manager.warning(test_msg)
@@ -110,7 +114,7 @@ def test_warning_method_calls_loguru(mocker):
 
 def test_repr_method():
     """Teste la représentation textuelle de l'instance."""
-    manager = LoggerManager()
+    manager = LoggerManager(logger_config)
 
     expected = f"<LoggerManager logs_dir={manager.logs_dir}>"
     assert repr(manager) == expected
@@ -118,7 +122,7 @@ def test_repr_method():
 
 def test_catch_decorator_propagates_to_loguru():
     """Vérifie que le décorateur catch utilise bien loguru."""
-    manager = LoggerManager()
+    manager = LoggerManager(logger_config)
 
     with patch.object(loguru_logger, "catch") as mock_catch:
         decorator = manager.catch(ValueError)
@@ -138,7 +142,7 @@ def test_log_file_creation_and_content(monkeypatch, tmp_path):
         "fast_api_xtrem.logger.logger_manager.__file__", str(fake_file)
     )
 
-    manager = LoggerManager()
+    manager = LoggerManager(logger_config)
 
     # Define a test message
     test_msg = "Message de test intégration"

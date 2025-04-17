@@ -33,9 +33,13 @@ class ApplicationServices:
         """
         self.config = config
         # Instancier le logger en amont pour l'ensemble des services
-        self.logger = LoggerManager()
+        self.logger = LoggerManager(self.config.logger_config)
         # Créer l'instance de DBManager en passant le logger
-        self.db_manager = DBManager(config=self.config, logger=self.logger)
+        self.db_manager = DBManager(
+            config=self.config.database_config,
+            logger_config=self.config.logger_config,
+            logger=self.logger,
+        )
         self._initialized = False
 
     def initialize(self) -> None:
