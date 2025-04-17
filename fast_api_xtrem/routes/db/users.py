@@ -124,7 +124,8 @@ class UserUpdate(BaseModel):
 
 @router_users.post("/login", response_model=dict)
 async def login(
-    data: UserLogin, db: Session = Depends(db_get.get_db), logger=Depends(get_logger)
+    data: UserLogin, db: Session = Depends(db_get.get_db),
+    logger=Depends(get_logger)
 ) -> JSONResponse:
     """
     Authentifie un utilisateur.
@@ -179,7 +180,8 @@ async def logout(logger=Depends(get_logger)) -> JSONResponse:
     "/users", status_code=status.HTTP_201_CREATED, response_model=dict
 )
 async def add_user(
-    data: UserCreate, db: Session = Depends(db_get.get_db), logger=Depends(get_logger)
+    data: UserCreate, db: Session = Depends(db_get.get_db),
+    logger=Depends(get_logger)
 ) -> JSONResponse:
     """
     Crée un nouvel utilisateur.
