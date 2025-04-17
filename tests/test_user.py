@@ -18,13 +18,13 @@ def session():
 
 
 def test_create_user(session):
-    utilisateur = User(nom="Alice",
-                       email="alice@example.com", pswd="secure123")
+    utilisateur = User(
+        nom="Alice", email="alice@example.com", pswd="secure123"
+    )
     session.add(utilisateur)
     session.commit()
 
-    result = session.query(User) \
-        .filter_by(email="alice@example.com").first()
+    result = session.query(User).filter_by(email="alice@example.com").first()
 
     assert result is not None
     assert result.nom == "Alice"
