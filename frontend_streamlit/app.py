@@ -13,6 +13,7 @@ for key, default in {
     "button_pressed": False,
     "email": "",
     "code": "",
+    "token": ""
 }.items():
     st.session_state.setdefault(key, default)
 
@@ -33,9 +34,12 @@ if not st.session_state.pswd_check:
                                          type="password", key="login_password")
                 if password:
                     if user_exist(username):
-                        if check_authentity(username, password):
+                        response = check_authentity(username, password)
+    
+                        if response.token:
                             st.success("Connexion réussie ✅")
                             st.session_state.pswd_check = True
+                            st.session_state.token = response.token
                             st.rerun()
                         else:
                             st.error("Mot de passe incorrect.")

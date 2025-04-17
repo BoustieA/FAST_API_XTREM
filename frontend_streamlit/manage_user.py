@@ -17,7 +17,7 @@ def check_email_valid(mail):
 def check_authentity(nom, pswd):
     json = {"nom": nom, "pswd": pswd}
     response = requests.post(URL_API + "/login", json=json)
-    
+
     return response.token
 
 
@@ -103,3 +103,13 @@ def get_user_data():
         return user
     
     return None
+
+def update_user(nom, email, pswd):
+    json = {"nom": nom, "email": email, "pswd": pswd}
+
+    response = requests.post(URL_API + "/users/{nom}", json=json)
+    data = response.json()
+
+    if data:
+        user = data.get("data")
+        return user
