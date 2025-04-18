@@ -1,5 +1,6 @@
 import requests
 from email_validator import validate_email, EmailNotValidError
+import streamlit as st
 
 
 URL_API = "http://127.0.0.1:8000"
@@ -15,10 +16,10 @@ def check_email_valid(mail):
 
 
 def check_authentity(nom, pswd):
-    json = {"nom": nom, "pswd": pswd}
-    response = requests.post(URL_API + "/login", json=json)
+    json = {"username": nom, "password": pswd}
+    response = requests.post(URL_API + "/token", data=json).json()
 
-    return response.token
+    return response.get("access_token")
 
 
 def user_exist(nom):
@@ -94,22 +95,22 @@ def check_pswd_security_level(mdp):
             break
     return security
 
-def get_user_data():
-    response = requests.get(URL_API + "/token_data")
+def get_user_data(headers):
+    response = requests.post(URL_API + "/user_info", headers=headers)
     data = response.json()
 
     if data:
-        user = data.get("data")
+        user = data
         return user
-    
+
     return None
 
 def update_user(nom, email, pswd):
     json = {"nom": nom, "email": email, "pswd": pswd}
 
-    response = requests.post(URL_API + "/users/{nom}", json=json)
-    data = response.json()
+    response = requests.put(URL_API + f"/users/{st.session_state.nom}", json=json)
 
-    if data:
-        user = data.get("data")
-        return user
+    if response:
+        return response.json()
+
+    return None

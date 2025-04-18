@@ -11,7 +11,9 @@ for key, default in {
     "pswd_check": False,
     "reset_password": False,
     "button_pressed": False,
+    "edit_profile": False,
     "email": "",
+    "nom": "",
     "code": "",
     "token": ""
 }.items():
@@ -35,12 +37,13 @@ if not st.session_state.pswd_check:
                 if password:
                     if user_exist(username):
                         response = check_authentity(username, password)
-    
-                        if response.token:
+
+                        if response:
                             st.success("Connexion réussie ✅")
                             st.session_state.pswd_check = True
-                            st.session_state.token = response.token
-                            st.rerun()
+                            st.session_state.token = response
+                            st.session_state.nom = username
+                            st.switch_page("pages/profile.py")
                         else:
                             st.error("Mot de passe incorrect.")
                             if st.button("Mot de passe oublié ?"):
@@ -112,11 +115,3 @@ if not st.session_state.pswd_check:
                                     st.balloons()
                 else:
                     st.error("Email non valide")
-
-# --- SI CONNECTÉ ---
-else:
-    st.success("Connecté avec succès.")
-    st.write("➡️ Utilisez le menu à gauche pour accéder aux autres pages.")
-    if st.button("Déconnexion"):
-        st.session_state.pswd_check = False
-        st.rerun()

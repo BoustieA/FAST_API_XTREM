@@ -9,16 +9,19 @@ via les services de l'application.
 import hashlib
 from typing import Any, Optional
 
+import jwt
+from jwt.exceptions import InvalidTokenError
+
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 
 from fast_api_xtrem.db.models.user import User
 from fast_api_xtrem.db.db_manager import DBManager
+from fast_api_xtrem.app.config import DatabaseConfig, LoggerConfig
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from datetime import datetime, timedelta
-import jwt
-from jwt.exceptions import InvalidTokenError
+
 
 
 # JWT config
@@ -32,7 +35,10 @@ from fast_api_xtrem.db.models.user import User, UserCreate, UserLogin, UserUpdat
 
 router_users = APIRouter()
 
-db_get = DBManager(DATABASE_URL)
+config = DatabaseConfig()
+logger_config = LoggerConfig()
+
+db_get = DBManager(config, logger_config)
 db_get.connect()
 
 
@@ -321,7 +327,7 @@ async def login_token(form_data: OAuth2PasswordRequestForm = Depends(),
 
     access_token = create_access_token(data={"nom": user.nom,
                                              "email": user.email})
-    return {"access_token": access_token, "token_type": "bearer"}
+    return JSONResponse({"access_token": access_token, "token_type": "bearer"})
 
 
 def decode_token(token: str, logger=Depends(get_logger)):
@@ -333,10 +339,10 @@ def decode_token(token: str, logger=Depends(get_logger)):
         raise HTTPException(status_code=401, detail="Token invalide")
 
 
-@router_users.get("/user_info")
+@router_users.post("/user_info")
 async def get_me(token: str = Depends(oauth2_scheme)):
     payload = decode_token(token)
-    return {"nom": payload["nom"], "email": payload["email"]}
+    return JSONResponse({"nom": payload["nom"], "email": payload["email"]})
 
 
 @router_users.get("/is_connected")
