@@ -1,5 +1,6 @@
 import requests
 from email_validator import validate_email, EmailNotValidError
+import streamlit as st
 
 
 URL_API = "http://127.0.0.1:8000"
@@ -15,13 +16,10 @@ def check_email_valid(mail):
 
 
 def check_authentity(nom, pswd):
-    json = {"nom": nom, "pswd": pswd}
-    response = requests.post(URL_API + "/login", json=json)
-    code = response.status_code
-    if code == 200:
-        return True
-    else:
-        return False
+    json = {"username": nom, "password": pswd}
+    response = requests.post(URL_API + "/users/token", data=json).json()
+
+    return response.get("access_token")
 
 
 def user_exist(nom):
@@ -57,11 +55,12 @@ def update_pswd(pswd, mail):
     response = requests.get(URL_API + "/users")
     data = response.json()
     users = data.get("data", [])
+    nom = ""
     for user in users:
         if user.get("email") == mail:
             nom = user.get("nom")
     json = {"nom": nom, "email": mail, "pswd": pswd}
-    requests.put(URL_API + "/users/" + nom, json=json)
+    requests.put(URL_API + "/users" + nom, json=json)
 
 
 def check_pswd_security_level(mdp):
@@ -95,3 +94,34 @@ def check_pswd_security_level(mdp):
         if security == 4:
             break
     return security
+
+
+def get_user_data(headers):
+    response = requests.get(URL_API + "/users/me", headers=headers)
+    data = response.json()
+
+    if data:
+        user = data
+        return user
+
+    return None
+
+
+def update_user(nom, email, pswd):
+    json = {"nom": nom, "email": email, "pswd": pswd}
+
+    response = requests.put(URL_API + f"/users/{st.session_state.nom}",
+                            json=json)
+
+    if response:
+        return response.json()
+
+    return None
+
+
+def check_if_valid_token(token):
+    headers = {"Authorization": f"Bearer {token}"}
+    if requests.get(URL_API + "/users/me", headers=headers):
+        return True
+
+    return False

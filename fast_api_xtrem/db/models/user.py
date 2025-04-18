@@ -5,6 +5,8 @@ Ce module définit la structure de la table utilisateur,
 incluant l'identifiant, le nom, l'email et le mot de passe.
 """
 
+from pydantic import BaseModel, constr, EmailStr
+
 from sqlalchemy import Column, Integer, String
 
 from fast_api_xtrem.db.base import Base
@@ -28,3 +30,21 @@ class User(Base):
     nom = Column(String(50), nullable=False)
     email = Column(String(100), nullable=False)
     pswd = Column(String(100), nullable=False)
+
+
+# Pydantic Models for request validation
+class UserLogin(BaseModel):
+    nom: constr(min_length=1, max_length=50)
+    pswd: constr(min_length=8)  # Consider a minimum password length
+
+
+class UserCreate(BaseModel):
+    nom: constr(min_length=1, max_length=50)
+    email: EmailStr
+    pswd: constr(min_length=8)
+
+
+class UserUpdate(BaseModel):
+    nom: constr(min_length=1, max_length=50)
+    email: EmailStr
+    pswd: constr(min_length=8)  # added pswd

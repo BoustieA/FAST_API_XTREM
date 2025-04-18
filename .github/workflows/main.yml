@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        app: [app, fast_api_xtrem]
+        app: [frontend_streamlit, fast_api_xtrem]
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -36,7 +36,7 @@ jobs:
     needs: lint
     strategy:
       matrix:
-        app: [app, fast_api_xtrem]
+        app: [frontend_streamlit, fast_api_xtrem]
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
