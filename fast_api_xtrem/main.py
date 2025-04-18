@@ -11,7 +11,6 @@ et lance l'application via Uvicorn.
 import os
 import sys
 
-from prometheus_fastapi_instrumentator import Instrumentator
 from uvicorn import run
 
 from fast_api_xtrem.app.application import Application
