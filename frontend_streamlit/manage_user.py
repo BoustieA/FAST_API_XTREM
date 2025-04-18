@@ -1,8 +1,9 @@
 import requests
 from email_validator import validate_email, EmailNotValidError
 
-
-URL_API = "http://127.0.0.1:8000"
+PORT=8000
+HOST = "localhost"
+URL_API = "http://" + HOST + ":" + str(PORT) + "/"
 
 
 def check_email_valid(mail):

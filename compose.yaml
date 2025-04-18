@@ -1,0 +1,35 @@
+version: "3.9"
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: fast_api_xtrem/Dockerfile
+    container_name: fastapi_xtrem
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./fast_api_xtrem/database:/app/fast_api_xtrem/database
+      - ./logs:/app/fast_api_xtrem/logs
+    networks:
+      - appnet
+
+  frontend:
+    build:
+      context: ./frontend_streamlit
+    container_name: streamlit_frontend
+    ports:
+      - "8501:8501"
+    depends_on:
+      - backend
+    networks:
+      - appnet
+
+volumes:
+  db_data:
+  app.log:
+  
+
+networks:
+  appnet:
+    driver: bridge

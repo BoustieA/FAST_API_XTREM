@@ -1,0 +1,3 @@
+streamlit
+email-validator
+loguru

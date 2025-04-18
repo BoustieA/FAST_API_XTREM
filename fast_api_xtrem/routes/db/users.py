@@ -16,6 +16,7 @@ from sqlalchemy.orm import Session
 
 from fast_api_xtrem.db.models.user import User
 from fast_api_xtrem.db.db_manager import DBManager
+from fast_api_xtrem.app.config import LoggerConfig, DatabaseConfig
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from datetime import datetime, timedelta
 import jwt
@@ -32,7 +33,16 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 router_users = APIRouter()
 
-db_get = DBManager(DATABASE_URL)
+logger_config = LoggerConfig(
+    log_level="INFO",
+    log_file_name="app.log",
+    log_rotation="10 MB",
+    log_retention="1 week",
+    log_compression="zip",
+    log_encoding="utf-8"
+)
+db_config = DatabaseConfig(database_url=DATABASE_URL)
+db_get = DBManager(db_config, logger_config)
 db_get.connect()
 
 
