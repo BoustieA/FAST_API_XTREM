@@ -1,36 +1,34 @@
 """
-Routes for user management.
+Routes pour la gestion des utilisateurs.
 
-Ce module définit les routes FastAPI pour la gestion des utilisateurs,
-ainsi que l'accès au logger et à la base de données
-via les services de l'application.
+Ce module définit les endpoints CRUD pour les utilisateurs,
+avec authentification JWT et gestion des dépendances.
 """
 
 import hashlib
+from datetime import datetime, timedelta, timezone
 from typing import Any, Optional
 
+import jwt
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.responses import JSONResponse
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from jwt.exceptions import InvalidTokenError
 from pydantic import BaseModel, EmailStr, constr
 from sqlalchemy.orm import Session
 
 from fast_api_xtrem.db.models.user import User
-from fast_api_xtrem.db.db_manager import DBManager
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from datetime import datetime, timedelta
-import jwt
-from jwt.exceptions import InvalidTokenError
 
-
-# JWT config
-SECRET_KEY = "votre-cle-secrete"
+# Configuration JWT
+SECRET_KEY = (
+    "votre-cle-secrete"  # À remplacer par une variable d'environnement
+)
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
-DATABASE_URL = "sqlite:///database/app_data.db"
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
-router_users = APIRouter()
+router_users = APIRouter(prefix="/users", tags=["users"])
 
 
 def get_db(request: Request):
@@ -182,7 +180,7 @@ async def logout(logger=Depends(get_logger)) -> JSONResponse:
 
 
 @router_users.post(
-    "/users", status_code=status.HTTP_201_CREATED, response_model=dict
+    "", status_code=status.HTTP_201_CREATED, response_model=dict
 )
 async def add_user(
     data: UserCreate, db: Session = Depends(get_db), logger=Depends(get_logger)
@@ -217,7 +215,7 @@ async def add_user(
     )
 
 
-@router_users.get("/users", response_model=dict)
+@router_users.get("", response_model=dict)
 async def get_all_users(
     db: Session = Depends(get_db), logger=Depends(get_logger)
 ) -> JSONResponse:
@@ -247,7 +245,7 @@ async def get_all_users(
     )
 
 
-@router_users.put("/users/{nom}", response_model=dict)
+@router_users.put("/{nom}", response_model=dict)
 async def update_user(
     nom: str,
     data: UserUpdate,
@@ -291,46 +289,79 @@ async def update_user(
     )
 
 
-@router_users.delete("/users/{nom}", response_model=dict)
+@router_users.delete("/{nom}")
 async def delete_user(
     nom: str, db: Session = Depends(get_db), logger=Depends(get_logger)
 ) -> JSONResponse:
     """
     Supprime un utilisateur existant.
-
-    Args:
-        nom (str): Nom de l'utilisateur à supprimer.
-        db (Session): Session base de données.
-        logger: Logger.
-
-    Returns:
-        JSONResponse: Message de confirmation.
     """
     user = get_user_by_name(db, nom)
     if not user:
-        logger.error("Aucun utilisateur trouvé")
+        logger.error(f"Utilisateur {nom} non trouvé")
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Erreur : aucun utilisateur trouvé",
+            detail="Erreur : utilisateur non trouvé",
         )
+
     db.delete(user)
     db.commit()
-    db_get.disconnect()
-    return create_response("Succès : utilisateur supprimé",
-                           status.HTTP_200_OK)
+
+    logger.success(f"Utilisateur {nom} supprimé")
+    return create_response(
+        message="Succès : utilisateur supprimé", status_code=status.HTTP_200_OK
+    )
 
 
-def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
+def create_access_token(
+    data: dict, expires_delta: Optional[timedelta] = None
+) -> str:
+    """
+    Crée un token JWT d'accès.
+
+    Args:
+        data (dict): Données à encoder dans le token
+        expires_delta (Optional[timedelta]): Durée de validité du token
+
+    Returns:
+        str: Token JWT encodé
+    """
     to_encode = data.copy()
-    expire = datetime.utcnow() + (expires_delta or timedelta(minutes=15))
+    expire = datetime.now(timezone.utc) + (
+        expires_delta or timedelta(minutes=15)
+    )
     to_encode.update({"exp": expire})
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
 
+def decode_token(token: str, logger=Depends(get_logger)) -> dict:
+    """
+    Décode et valide un token JWT.
+
+    Args:
+        token (str): Token JWT à décoder
+        logger: Logger pour le suivi des erreurs
+
+    Returns:
+        dict: Payload décodé
+
+    Raises:
+        HTTPException: Si le token est invalide ou expiré
+    """
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        return payload
+    except InvalidTokenError as exc:
+        logger.error("Token non valide")
+        raise HTTPException(status_code=401, detail="Token invalide") from exc
+
+
 @router_users.post("/token")
-async def login_token(form_data: OAuth2PasswordRequestForm = Depends(),
-                      db: Session = Depends(db_get.get_db),
-                      logger=Depends(get_logger)):
+async def login_token(
+    form_data: OAuth2PasswordRequestForm = Depends(),
+    db: Session = Depends(get_db),
+    logger=Depends(get_logger),
+):
     """Route d'authentification qui génère un token JWT"""
 
     # form_data contient .username et .password
@@ -353,30 +384,26 @@ async def login_token(form_data: OAuth2PasswordRequestForm = Depends(),
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    access_token = create_access_token(data={"nom": user.nom,
-                                             "email": user.email})
+    access_token = create_access_token(
+        data={"nom": user.nom, "email": user.email}
+    )
     return {"access_token": access_token, "token_type": "bearer"}
 
 
-def decode_token(token: str, logger=Depends(get_logger)):
-    try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        return payload
-    except InvalidTokenError:
-        logger.error("token non valide")
-        raise HTTPException(status_code=401, detail="Token invalide")
-
-
-@router_users.get("/user_info")
-async def get_me(token: str = Depends(oauth2_scheme)):
+@router_users.get("/me")
+async def get_current_user(
+    token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)
+):
+    """
+    Récupère les informations de l'utilisateur courant.
+    """
     payload = decode_token(token)
-    return {"nom": payload["nom"], "email": payload["email"]}
+    user = get_user_by_name(db, payload["nom"])
 
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Utilisateur non trouvé",
+        )
 
-@router_users.get("/is_connected")
-async def get_connection_status(token: str = Depends(oauth2_scheme)):
-    try:
-        decode_token(token)
-        return True
-    except Exception:
-        return False
+    return {"nom": user.nom, "email": user.email}
