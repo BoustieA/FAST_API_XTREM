@@ -37,7 +37,6 @@ def create_app() -> Application:
 # Point d'entrée principal
 if __name__ == "__main__":
     app = create_app()
-    Instrumentator().instrument(app.fast_api).expose(app.fast_api)
     # Lancement de l'application via Uvicorn
     host = app.config.network_config.host
     port = app.config.network_config.port
