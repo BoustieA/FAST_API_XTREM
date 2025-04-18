@@ -16,7 +16,8 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jwt.exceptions import InvalidTokenError
 from sqlalchemy.orm import Session
 
-from fast_api_xtrem.db.models.user import User
+from fast_api_xtrem.db.models.user import User, UserCreate, \
+    UserLogin, UserUpdate
 
 # Configuration JWT
 SECRET_KEY = (
@@ -26,7 +27,6 @@ ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
-from fast_api_xtrem.db.models.user import User, UserCreate, UserLogin, UserUpdate
 
 router_users = APIRouter(prefix="/users", tags=["users"])
 
@@ -376,6 +376,7 @@ async def get_current_user(
         )
 
     return {"nom": user.nom, "email": user.email}
+
 
 @router_users.get("/is_connected")
 async def get_connection_status(token: str = Depends(oauth2_scheme)):
