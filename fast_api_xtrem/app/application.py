@@ -28,9 +28,9 @@ class Application:
         """
         self.config: AppConfig = config
         self.services: Optional[ApplicationServices] = None
-        self.app: FastAPI = self._create_app()
+        self.fast_api: FastAPI = self._create_fast_api()
 
-    def _create_app(self) -> FastAPI:
+    def _create_fast_api(self) -> FastAPI:
         """
         Crée et configure l'instance FastAPI.
 
@@ -82,7 +82,7 @@ class Application:
             )
 
         return uvicorn.run(
-            self.app,
+            self.fast_api,
             host=self.config.network_config.host,
             port=self.config.network_config.port,
             reload=False,
