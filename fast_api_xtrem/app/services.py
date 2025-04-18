@@ -64,13 +64,13 @@ class ApplicationServices:
             self.db_manager.connect()
         except Exception as e:
             self.logger.error(
-                f"Échec de la connexion à la base de données : {e}"
+                f"Échec de la connexion à la base de données : {e}"
             )
             raise
 
         # Optionnel : afficher les tables existantes pour debug
         tables = self.db_manager.check_tables()
-        self.logger.info(f"Tables dans la BD au démarrage : {tables}")
+        self.logger.info(f"Tables dans la BD au démarrage : {tables}")
 
         self._initialized = True
         self.logger.info("✅ Tous les services ont été initialisés")

@@ -35,4 +35,9 @@ async def root(logger=Depends(get_logger)):
         dict: Message de bienvenue et liens vers la documentation.
     """
     logger.info("Appel de la route root")
-    return {"message": "Hello World", "docs": "/docs", "redoc": "/redoc"}
+    return {
+        "message": "Hello World",
+        "docs": "/docs",
+        "redoc": "/redoc",
+        "metrics": "/metrics",
+    }

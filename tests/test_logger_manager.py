@@ -150,7 +150,7 @@ def test_log_file_creation_and_content(monkeypatch, tmp_path):
     manager.info(test_msg)
 
     # Check if the log file exists
-    log_file = manager.logs_dir / "app.log"
+    log_file = manager.logs_dir / "fast_api.log"
     assert log_file.exists(), "Le fichier de log doit exister"
 
     # Initialize log_content to an empty string as a fallback
