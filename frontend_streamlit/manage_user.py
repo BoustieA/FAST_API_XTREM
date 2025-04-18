@@ -95,6 +95,7 @@ def check_pswd_security_level(mdp):
             break
     return security
 
+
 def get_user_data(headers):
     response = requests.get(URL_API + "/users/me", headers=headers)
     data = response.json()
@@ -105,15 +106,18 @@ def get_user_data(headers):
 
     return None
 
+
 def update_user(nom, email, pswd):
     json = {"nom": nom, "email": email, "pswd": pswd}
 
-    response = requests.put(URL_API + f"/users/{st.session_state.nom}", json=json)
+    response = requests.put(URL_API + f"/users/{st.session_state.nom}",
+                            json=json)
 
     if response:
         return response.json()
 
     return None
+
 
 def check_if_valid_token(token):
     headers = {"Authorization": f"Bearer {token}"}

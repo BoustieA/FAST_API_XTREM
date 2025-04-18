@@ -14,8 +14,7 @@ if check_token:
     st.text(f"Nom : {user.get("nom")}")
     st.text(f"Email : {user.get("email")}")
 
-
-    if st.session_state.edit_profile == False:
+    if not st.session_state.edit_profile:
         if st.button("Modifier le profil"):
             st.session_state.edit_profile = True
 
