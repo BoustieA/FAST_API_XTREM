@@ -9,6 +9,9 @@ on:
 jobs:
   lint:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        app: [app, fast_api_xtrem]
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -18,19 +21,22 @@ jobs:
         with:
           python-version: '3.13'
 
-      - name: Install dependencies
+      - name: Install dependencies for ${{ matrix.app }}
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          pip install -r ${{ matrix.app }}/requirements.txt
 
-      - name: Run linting
+      - name: Run linting for ${{ matrix.app }}
         run: |
           pip install flake8
-          flake8 .  
+          flake8 ${{ matrix.app }}/
 
   test:
     runs-on: ubuntu-latest
-    needs: lint  # Attend la réussite du linting
+    needs: lint
+    strategy:
+      matrix:
+        app: [app, fast_api_xtrem]
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -40,26 +46,26 @@ jobs:
         with:
           python-version: '3.13'
 
-      - name: Install dependencies
+      - name: Install dependencies for ${{ matrix.app }}
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          pip install -r ${{ matrix.app }}/requirements.txt
 
       - name: Install test tools
         run: pip install pytest coverage pytest-cov pytest-mock
 
-      - name: Check if tests exist
+      - name: Check if tests exist for ${{ matrix.app }}
         id: check_tests
         run: |
-          if [ -d "tests" ] && [ "$(find tests -name "test_*.py" | wc -l)" -gt 0 ]; then
+          if [ -d "${{ matrix.app }}/tests" ] && [ "$(find ${{ matrix.app }}/tests -name "test_*.py" | wc -l)" -gt 0 ]; then
             echo "tests_exist=true" >> $GITHUB_OUTPUT
           else
             echo "tests_exist=false" >> $GITHUB_OUTPUT
-            echo "No test files found in tests directory. Skipping tests."
+            echo "No test files found in ${{ matrix.app }}/tests directory. Skipping tests."
           fi
 
-      - name: Run tests with coverage
+      - name: Run tests with coverage for ${{ matrix.app }}
         if: steps.check_tests.outputs.tests_exist == 'true'
         run: |
-          mkdir -p coverage  # Ensure the coverage directory exists
-          pytest --cov=fast_api_xtrem --cov-report=xml:coverage/coverage.xml tests/
+          mkdir -p coverage/${{ matrix.app }}
+          pytest --cov=${{ matrix.app }} --cov-report=xml:coverage/${{ matrix.app }}/coverage.xml ${{ matrix.app }}/tests/
