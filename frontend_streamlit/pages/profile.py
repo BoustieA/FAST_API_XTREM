@@ -1,10 +1,13 @@
 import streamlit as st
 
-from manage_user import get_user_data, update_user
+from manage_user import get_user_data, update_user, \
+    check_authentity, check_if_valid_token
 
 st.title("Profil")
 
-if st.session_state.token:
+check_token = check_if_valid_token(st.session_state.token)
+
+if check_token:
     headers = {"Authorization": f"Bearer {st.session_state.token}"}
     user = get_user_data(headers=headers)
 
@@ -12,7 +15,7 @@ if st.session_state.token:
     st.text(f"Email : {user.get("email")}")
 
 
-    if not st.session_state.edit_profile:
+    if st.session_state.edit_profile == False:
         if st.button("Modifier le profil"):
             st.session_state.edit_profile = True
 
@@ -27,7 +30,9 @@ if st.session_state.token:
                 st.error("❌ Tous les champs sont obligatoires.")
             else:
                 response = update_user(new_nom, new_email, new_pswd)
-                st.success(response["message"])
+                st.session_state.nom = new_nom
+                token = check_authentity(new_nom, new_pswd)
+                st.session_state.token = token
                 st.session_state.edit_profile = False
                 st.rerun()
 

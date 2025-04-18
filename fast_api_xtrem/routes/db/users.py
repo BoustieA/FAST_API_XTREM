@@ -14,7 +14,6 @@ from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.responses import JSONResponse
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jwt.exceptions import InvalidTokenError
-from pydantic import BaseModel, EmailStr, constr
 from sqlalchemy.orm import Session
 
 from fast_api_xtrem.db.models.user import User
@@ -334,7 +333,6 @@ async def login_token(
     logger=Depends(get_logger),
 ):
     """Route d'authentification qui génère un token JWT"""
-
     # form_data contient .username et .password
     user = get_user_by_name(db, form_data.username)
 
@@ -358,7 +356,7 @@ async def login_token(
     access_token = create_access_token(
         data={"nom": user.nom, "email": user.email}
     )
-    return {"access_token": access_token, "token_type": "bearer"}
+    return JSONResponse({"access_token": access_token, "token_type": "bearer"})
 
 
 @router_users.get("/me")
@@ -378,3 +376,11 @@ async def get_current_user(
         )
 
     return {"nom": user.nom, "email": user.email}
+
+@router_users.get("/is_connected")
+async def get_connection_status(token: str = Depends(oauth2_scheme)):
+    try:
+        decode_token(token)
+        return True
+    except Exception:
+        return False

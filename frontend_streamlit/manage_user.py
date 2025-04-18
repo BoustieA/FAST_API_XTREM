@@ -17,7 +17,7 @@ def check_email_valid(mail):
 
 def check_authentity(nom, pswd):
     json = {"username": nom, "password": pswd}
-    response = requests.post(URL_API + "/token", data=json).json()
+    response = requests.post(URL_API + "/users/token", data=json).json()
 
     return response.get("access_token")
 
@@ -60,7 +60,7 @@ def update_pswd(pswd, mail):
         if user.get("email") == mail:
             nom = user.get("nom")
     json = {"nom": nom, "email": mail, "pswd": pswd}
-    requests.put(URL_API + "/users/" + nom, json=json)
+    requests.put(URL_API + "/users" + nom, json=json)
 
 
 def check_pswd_security_level(mdp):
@@ -96,7 +96,7 @@ def check_pswd_security_level(mdp):
     return security
 
 def get_user_data(headers):
-    response = requests.post(URL_API + "/user_info", headers=headers)
+    response = requests.get(URL_API + "/users/me", headers=headers)
     data = response.json()
 
     if data:
@@ -114,3 +114,10 @@ def update_user(nom, email, pswd):
         return response.json()
 
     return None
+
+def check_if_valid_token(token):
+    headers = {"Authorization": f"Bearer {token}"}
+    if requests.get(URL_API + "/users/me", headers=headers):
+        return True
+
+    return False
