@@ -12,6 +12,7 @@ import os
 import sys
 
 from prometheus_fastapi_instrumentator import Instrumentator
+from uvicorn import run
 
 from fast_api_xtrem.app.application import Application
 from fast_api_xtrem.app.config import AppConfig
@@ -37,4 +38,7 @@ def create_app() -> Application:
 if __name__ == "__main__":
     app = create_app()
     Instrumentator().instrument(app.fast_api).expose(app.fast_api)
-    app.run()
+    # Lancement de l'application via Uvicorn
+    host = app.config.network_config.host
+    port = app.config.network_config.port
+    run(app.fast_api, host=host, port=port)

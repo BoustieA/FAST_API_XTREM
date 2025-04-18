@@ -15,6 +15,7 @@ from sqlalchemy.orm import sessionmaker
 
 from fast_api_xtrem.app.config import DatabaseConfig, LoggerConfig
 from fast_api_xtrem.db.base import Base
+from fast_api_xtrem.db.utils.utils import seed_default_roles
 from fast_api_xtrem.logger.logger_manager import LoggerManager
 
 
@@ -92,38 +93,29 @@ class DBManager:
         for table_name in Base.metadata.tables.keys():
             self.logger.info(f"Création de la table: {table_name}")
         Base.metadata.create_all(bind=self.engine)
+        self.logger.success("✅ Tables crées")
+        # Alimentation des rôles par défaut [[4]]
+        seed_default_roles(self.engine, self.logger)
 
     def connect(self):
-        """Établit la connexion à la base de données SQLite."""
+        """Connexion avec vérifications supplémentaires."""
+        if self.engine:
+            self.logger.warning("Connexion déjà établie")
+            return False  # Évite les connexions multiples [[9]]
+
         try:
-            self.logger.info(f"Tentative de connexion à: {self.database_url}")
             self.engine = create_engine(
                 self.database_url,
-                connect_args={"check_same_thread": False},  # Pour SQLite
+                connect_args={"check_same_thread": False},
+                pool_pre_ping=True,  # Vérifie la validité des connexions [[5]]
             )
-
             self._create_tables()
-
-            self.session_local = sessionmaker(
-                autocommit=False, autoflush=False, bind=self.engine
-            )
-
-            with self.engine.connect() as conn:
-                with conn.begin():
-                    pass  # Vérifie que la base répond
-
-            self.logger.success(
-                f"✅ Connecté à la base de données: {self.database_url}"
-            )
+            self.session_local = sessionmaker(bind=self.engine)
+            self.logger.success("✅ Connexion réussie")
             return True
-
         except Exception as e:
-            self.logger.error(
-                f"❌ Erreur de connexion à la base de données: {str(e)}"
-            )
-            raise DBConnectionError(
-                "Échec de la connexion à la base de données"
-            ) from e
+            self.logger.error(f"Échec de connexion : {str(e)}")
+            raise DBConnectionError from e
 
     def disconnect(self):
         """Ferme proprement la connexion à la base de données."""
@@ -136,24 +128,20 @@ class DBManager:
             )
 
     def get_db(self):
-        """
-        Fournit une session de base de données
-        pour les dépendances FastAPI.
-
-        Yields:
-            Session: Instance de session SQLAlchemy.
-        """
+        """Fournit une session SQLAlchemy."""
         if not self.session_local:
-            self.logger.error(
-                "Tentative d'obtenir une session sans connexion active"
-            )
+            self.logger.error("Session non initialisée")
             raise DBConnectionError("Base de données non connectée")
 
         db = self.session_local()
         try:
             yield db
+        except Exception as e:
+            db.rollback()
+            self.logger.error(f"Erreur de session : {str(e)}")
+            raise
         finally:
-            db.close()
+            db.close()  # Fermeture explicite [[6]]
 
     def check_tables(self):
         """
